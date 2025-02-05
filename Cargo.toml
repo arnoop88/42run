@@ -1,0 +1,15 @@
+[package]
+name = "forty_two_run"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "42run"
+path = "src/main.rs"
+
+[dependencies]
+gl = "0.14.0"
+glfw = "0.59.0"
+nalgebra = "0.33.2"
+png = "0.17.16"
+thiserror = "2.0.11"

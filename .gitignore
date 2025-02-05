@@ -1,0 +1,17 @@
+# Directories
+/target/
+*.idea/
+.vscode/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Rust specific
+Cargo.lock
+*.rs.bk
+
+# Compiled library files
+*.so
+*.dylib
+*.dll
