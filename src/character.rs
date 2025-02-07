@@ -8,7 +8,7 @@ pub struct Character {
 }
 
 impl Character {
-    const LANE_WIDTH: f32 = 2.0;
+    pub const LANE_WIDTH: f32 = 2.0;
     const JUMP_FORCE: f32 = 5.0;
     const GRAVITY: f32 = -9.8;
     const MOVE_SPEED: f32 = 8.0;

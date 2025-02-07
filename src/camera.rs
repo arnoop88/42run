@@ -20,14 +20,14 @@ impl Camera {
 
     pub fn update(&mut self, character_pos: &Point3<f32>) {
         self.position = Point3::new(
-            character_pos.x,
+            0.0,
             Self::FOLLOW_HEIGHT,
             character_pos.z + Self::FOLLOW_DISTANCE,
         );
         self.target = Point3::new(
-            character_pos.x,
-            character_pos.y,
-            character_pos.z,
+            0.0,
+            character_pos.y * 0.3,
+            character_pos.z - 5.0,
         );
     }
 

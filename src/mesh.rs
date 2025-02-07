@@ -5,8 +5,10 @@ use std::ffi::CString;
 #[derive(Debug)]
 pub struct Vertex {
     pub position: Vector3<f32>,
+	pub color: Vector3<f32>,
 }
 
+#[derive(Debug)]
 pub struct Mesh {
     vao: GLuint,
     vbo: GLuint,
@@ -15,6 +17,10 @@ pub struct Mesh {
 }
 
 impl Mesh {
+	pub const PLAYER_COLOR: Vector3<f32> = Vector3::new(1.0, 0.0, 0.0); // Red
+    pub const OBSTACLE_COLOR: Vector3<f32> = Vector3::new(1.0, 1.0, 0.0); // Yellow
+    const ROAD_COLOR: Vector3<f32> = Vector3::new(0.3, 0.3, 0.3); // Dark gray
+
     pub fn new(vertices: &[Vertex], indices: &[u32]) -> Self {
         let mut vao = 0;
         let mut vbo = 0;
@@ -47,7 +53,7 @@ impl Mesh {
                 gl::STATIC_DRAW,
             );
 
-            // Set vertex attribute pointers
+            // Position
             let pos_location = 0;
             gl::EnableVertexAttribArray(pos_location as GLuint);
             gl::VertexAttribPointer(
@@ -57,6 +63,14 @@ impl Mesh {
                 gl::FALSE,
                 std::mem::size_of::<Vertex>() as GLsizei,
                 std::ptr::null(),
+            );
+
+			// Color
+			gl::EnableVertexAttribArray(1);
+            gl::VertexAttribPointer(
+                1, 3, gl::FLOAT, gl::FALSE,
+                std::mem::size_of::<Vertex>() as GLsizei,
+                (3 * std::mem::size_of::<f32>()) as *const _,
             );
 
             // Unbind VAO
@@ -69,6 +83,22 @@ impl Mesh {
             ebo,
             indices_count: indices.len() as i32,
         }
+    }
+
+	pub fn platform() -> Self {
+        let vertices = vec![
+            Vertex { position: Vector3::new(-3.0, -0.1, -10.0), color: Self::ROAD_COLOR },
+            Vertex { position: Vector3::new(3.0, -0.1, -10.0), color: Self::ROAD_COLOR },
+            Vertex { position: Vector3::new(3.0, -0.1, 10.0), color: Self::ROAD_COLOR },
+            Vertex { position: Vector3::new(-3.0, -0.1, 10.0), color: Self::ROAD_COLOR },
+        ];
+
+        let indices = vec![
+            0, 1, 2,
+            2, 3, 0,
+        ];
+
+        Mesh::new(&vertices, &indices)
     }
 
     pub fn draw(&self) {
@@ -84,18 +114,18 @@ impl Mesh {
         }
     }
 
-	pub fn cube() -> Self {
+	pub fn cube(color: Vector3<f32>) -> Self {
 		let vertices = vec![
 			// Front face
-			Vertex { position: Vector3::new(-0.5, -0.5,  0.5) },
-			Vertex { position: Vector3::new( 0.5, -0.5,  0.5) },
-			Vertex { position: Vector3::new( 0.5,  0.5,  0.5) },
-			Vertex { position: Vector3::new(-0.5,  0.5,  0.5) },
+			Vertex { position: Vector3::new(-0.5, -0.5, 0.5), color },
+            Vertex { position: Vector3::new( 0.5, -0.5, 0.5), color },
+            Vertex { position: Vector3::new( 0.5,  0.5, 0.5), color },
+            Vertex { position: Vector3::new(-0.5,  0.5, 0.5), color },
 			// Back face
-			Vertex { position: Vector3::new(-0.5, -0.5, -0.5) },
-			Vertex { position: Vector3::new( 0.5, -0.5, -0.5) },
-			Vertex { position: Vector3::new( 0.5,  0.5, -0.5) },
-			Vertex { position: Vector3::new(-0.5,  0.5, -0.5) },
+			Vertex { position: Vector3::new(-0.5, -0.5, -0.5), color },
+			Vertex { position: Vector3::new( 0.5, -0.5, -0.5), color },
+			Vertex { position: Vector3::new( 0.5,  0.5, -0.5), color },
+			Vertex { position: Vector3::new(-0.5,  0.5, -0.5), color },
 		];
 
 		let indices = vec![
