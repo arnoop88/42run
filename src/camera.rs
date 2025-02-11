@@ -1,4 +1,5 @@
 use nalgebra::{Matrix4, Point3, Vector3, Perspective3};
+use crate::character::Character;
 
 pub struct Camera {
     position: Point3<f32>,
@@ -7,8 +8,8 @@ pub struct Camera {
 }
 
 impl Camera {
-    const FOLLOW_DISTANCE: f32 = 5.0;
-    const FOLLOW_HEIGHT: f32 = 2.0;
+    const FOLLOW_DISTANCE: f32 = 8.0;
+    const FOLLOW_HEIGHT: f32 = 3.0;
 
     pub fn new(aspect_ratio: f32) -> Self {
         Self {
@@ -18,16 +19,18 @@ impl Camera {
         }
     }
 
-    pub fn update(&mut self, character_pos: &Point3<f32>) {
+    pub fn update(&mut self, player_z: f32) {
+        // Fixed camera position (centered on X axis)
         self.position = Point3::new(
-            0.0,
+            0.0,  // Always center X
             Self::FOLLOW_HEIGHT,
-            character_pos.z + Self::FOLLOW_DISTANCE,
+            player_z - Self::FOLLOW_DISTANCE
         );
+
         self.target = Point3::new(
             0.0,
-            character_pos.y * 0.3,
-            character_pos.z - 5.0,
+            Self::FOLLOW_HEIGHT * 0.5,
+            player_z + 10.0
         );
     }
 

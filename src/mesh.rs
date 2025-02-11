@@ -87,10 +87,10 @@ impl Mesh {
 
 	pub fn platform() -> Self {
         let vertices = vec![
-            Vertex { position: Vector3::new(-3.0, -0.1, -10.0), color: Self::ROAD_COLOR },
-            Vertex { position: Vector3::new(3.0, -0.1, -10.0), color: Self::ROAD_COLOR },
-            Vertex { position: Vector3::new(3.0, -0.1, 10.0), color: Self::ROAD_COLOR },
-            Vertex { position: Vector3::new(-3.0, -0.1, 10.0), color: Self::ROAD_COLOR },
+            Vertex { position: Vector3::new(-3.0, 0.0, -15.0), color: Self::ROAD_COLOR },
+            Vertex { position: Vector3::new(3.0, 0.0, -15.0), color: Self::ROAD_COLOR },
+            Vertex { position: Vector3::new(3.0, 0.0, 15.0), color: Self::ROAD_COLOR },
+            Vertex { position: Vector3::new(-3.0, 0.0, 15.0), color: Self::ROAD_COLOR },
         ];
 
         let indices = vec![
@@ -117,15 +117,15 @@ impl Mesh {
 	pub fn cube(color: Vector3<f32>) -> Self {
 		let vertices = vec![
 			// Front face
-			Vertex { position: Vector3::new(-0.5, -0.5, 0.5), color },
-            Vertex { position: Vector3::new( 0.5, -0.5, 0.5), color },
-            Vertex { position: Vector3::new( 0.5,  0.5, 0.5), color },
-            Vertex { position: Vector3::new(-0.5,  0.5, 0.5), color },
+			Vertex { position: Vector3::new(-0.5,  0.0,  0.5), color },
+            Vertex { position: Vector3::new( 0.5,  0.0,  0.5), color },
+            Vertex { position: Vector3::new( 0.5,  0.0, -0.5), color },
+            Vertex { position: Vector3::new(-0.5,  0.0, -0.5), color },
 			// Back face
-			Vertex { position: Vector3::new(-0.5, -0.5, -0.5), color },
-			Vertex { position: Vector3::new( 0.5, -0.5, -0.5), color },
-			Vertex { position: Vector3::new( 0.5,  0.5, -0.5), color },
-			Vertex { position: Vector3::new(-0.5,  0.5, -0.5), color },
+			Vertex { position: Vector3::new(-0.5,  1.0,  0.5), color },
+			Vertex { position: Vector3::new( 0.5,  1.0,  0.5), color },
+			Vertex { position: Vector3::new( 0.5,  1.0, -0.5), color },
+			Vertex { position: Vector3::new(-0.5,  1.0, -0.5), color },
 		];
 
 		let indices = vec![
