@@ -23,7 +23,8 @@ pub struct LevelGenerator {
 
 impl LevelGenerator {
     const SEGMENT_SPACING: f32 = 20.0;
-    const VISIBLE_SEGMENTS: usize = 8;
+    const VISIBLE_SEGMENTS: usize = 15;
+	const OBSTACLE_OFFSET: f32 = 15.0;
 
     pub fn new() -> Self {
 		let obstacle_template = Mesh::cube(Mesh::OBSTACLE_COLOR);
@@ -57,14 +58,14 @@ impl LevelGenerator {
         let mut obstacles = Vec::new();
 		let mut rng = rand::thread_rng();
         
-        for _ in 0..rng.gen_range(0..3) {
-			let lane = rng.gen_range(-1..=1); // -1, 0, or 1
+        for _ in 0..rng.gen_range(1..4) {
+			let lane = rng.gen_range(-1..=1);
 			obstacles.push(Obstacle {
 				mesh: self.create_obstacle_mesh(),
 				position: Point3::new(
 					lane as f32 * Character::LANE_WIDTH,
-					0.0,
-					z_pos + 30.0
+					0.0, // 0.5
+					z_pos + Self::OBSTACLE_OFFSET
 				),
 			});
 		}
@@ -72,14 +73,14 @@ impl LevelGenerator {
     }
 
     pub fn update(&mut self, player_z: f32) {
-		// Remove segments behind with buffer
-		let remove_threshold = player_z - (Self::SEGMENT_SPACING * 1.5);
+		// Remove segments with buffer
+		let remove_threshold = player_z - (Self::SEGMENT_SPACING * 2.0);
 		while self.segments.first().map(|s| s.position) < Some(remove_threshold) {
 			self.segments.remove(0);
 		}
 	
-		// Generate segments with speed anticipation
-		let generation_threshold = player_z + (Self::SEGMENT_SPACING * Self::VISIBLE_SEGMENTS as f32);
+		// Generate segments further ahead
+		let generation_threshold = player_z + (Self::SEGMENT_SPACING * (Self::VISIBLE_SEGMENTS as f32 + 5.0));
 		while self.next_z < generation_threshold {
 			self.generate_segment();
 			self.next_z += Self::SEGMENT_SPACING;

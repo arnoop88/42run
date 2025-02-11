@@ -87,10 +87,10 @@ impl Mesh {
 
 	pub fn platform() -> Self {
         let vertices = vec![
-            Vertex { position: Vector3::new(-3.0, 0.0, -15.0), color: Self::ROAD_COLOR },
-            Vertex { position: Vector3::new(3.0, 0.0, -15.0), color: Self::ROAD_COLOR },
-            Vertex { position: Vector3::new(3.0, 0.0, 15.0), color: Self::ROAD_COLOR },
-            Vertex { position: Vector3::new(-3.0, 0.0, 15.0), color: Self::ROAD_COLOR },
+            Vertex { position: Vector3::new(-3.0, 0.0, -20.0), color: Self::ROAD_COLOR },
+            Vertex { position: Vector3::new(3.0, 0.0, -20.0), color: Self::ROAD_COLOR },
+            Vertex { position: Vector3::new(3.0, 0.0, 20.0), color: Self::ROAD_COLOR },
+            Vertex { position: Vector3::new(-3.0, 0.0, 20.0), color: Self::ROAD_COLOR },
         ];
 
         let indices = vec![

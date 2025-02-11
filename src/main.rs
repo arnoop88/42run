@@ -58,7 +58,7 @@ fn main() {
 		character.update(delta_time);
         world.player_z += world.speed * delta_time;
 		level_generator.update(world.player_z);
-        world.speed += 0.05 * delta_time;
+        world.speed = (world.speed + 0.05 * delta_time).min(10.0);
 		let distance_text = format!("Distance: {:.0}m", world.player_z);
 
         unsafe {
@@ -76,7 +76,7 @@ fn main() {
                 45.0f32.to_radians(),
                 800.0 / 600.0,
                 0.1,
-                100.0
+                1000.0
             );
 
             shader.set_mat4("view", &view);
@@ -96,9 +96,9 @@ fn main() {
                 // Obstacles
                 for obstacle in &segment.obstacles {
                     let obstacle_z = obstacle.position.z - world.player_z;
-                    if obstacle_z < -10.0 || obstacle_z > 50.0 {
-                        continue;
-                    }
+					if obstacle_z < -25.0 {
+						continue;
+					}
                     
                     let model = translation(
                         obstacle.position.x,
@@ -113,7 +113,7 @@ fn main() {
             // Character using custom translation
             let model = translation(
                 character.position.x,
-                character.position.y,
+                character.position.y,// + 0.5,
                 world.player_z
             );
             shader.set_mat4("model", &model);
