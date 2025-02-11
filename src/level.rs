@@ -72,20 +72,18 @@ impl LevelGenerator {
 		obstacles
     }
 
-    pub fn update(&mut self, player_z: f32) {
-		// Remove segments with buffer
-		let remove_threshold = player_z - (Self::SEGMENT_SPACING * 2.0);
-		while self.segments.first().map(|s| s.position) < Some(remove_threshold) {
-			self.segments.remove(0);
-		}
-	
-		// Generate segments further ahead
-		let generation_threshold = player_z + (Self::SEGMENT_SPACING * (Self::VISIBLE_SEGMENTS as f32 + 5.0));
-		while self.next_z < generation_threshold {
-			self.generate_segment();
-			self.next_z += Self::SEGMENT_SPACING;
-		}
-	}
+    pub fn update(&mut self, world_z: f32) {
+        // Generate segments infinitely in positive Z direction
+        let generation_threshold = world_z + 1000.0;  // Always 1000 units ahead
+        while self.next_z < generation_threshold {
+            self.generate_segment();
+            self.next_z += Self::SEGMENT_SPACING;
+        }
+        
+        // Remove segments far behind
+        let remove_threshold = world_z - 500.0;
+        self.segments.retain(|s| s.position > remove_threshold);
+    }
 
 	fn create_obstacle_mesh(&self) -> Mesh {
         // Create a new cube mesh with same parameters as template

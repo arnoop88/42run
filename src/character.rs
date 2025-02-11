@@ -4,7 +4,7 @@ pub struct Character {
     pub position: Point3<f32>,
     velocity: Vector3<f32>,
     is_grounded: bool,
-    lane: i8, // -1 = left, 0 = center, 1 = right
+    lane: i8,
 }
 
 impl Character {

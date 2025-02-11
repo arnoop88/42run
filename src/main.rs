@@ -12,7 +12,7 @@ use math::{translation, perspective, look_at};
 
 struct WorldState {
     speed: f32,
-    player_z: f32,
+    z: f32,
     last_frame_time: f64,
 }
 
@@ -42,8 +42,8 @@ fn main() {
     let mut camera = camera::Camera::new(800.0 / 600.0);
     let mut level_generator = level::LevelGenerator::new();
     let mut world = WorldState {
-        speed: 5.0,
-        player_z: 0.0,
+        speed: 20.0,
+        z: 0.0,
         last_frame_time: glfw.get_time(),
     };
 
@@ -56,10 +56,11 @@ fn main() {
         let delta_time = (current_time - world.last_frame_time) as f32;
         world.last_frame_time = current_time;
 		character.update(delta_time);
-        world.player_z += world.speed * delta_time;
-		level_generator.update(world.player_z);
-        world.speed = (world.speed + 0.05 * delta_time).min(10.0);
-		let distance_text = format!("Distance: {:.0}m", world.player_z);
+        world.z += world.speed * delta_time;
+		level_generator.update(world.z);
+        world.speed = (world.speed + 0.2 * delta_time).min(50.0);
+		let distance_text = format!("Distance: {:.0}m", world.z);
+		print!("speed: {}, distance: {}\n", world.speed, distance_text);
 
         unsafe {
             gl::ClearColor(0.1, 0.1, 0.1, 1.0);
@@ -68,8 +69,8 @@ fn main() {
             shader.use_program();
 
 			// Camera
-			let eye = Vector3::new(0.0, 3.0, world.player_z - 10.0);
-			let target = Vector3::new(0.0, 1.0, world.player_z + 10.0);
+			let eye = Vector3::new(0.0, 3.0, -10.0);
+			let target = Vector3::new(0.0, 1.0, 0.0);
 			let view = math::look_at(eye, target, Vector3::new(0.0, 1.0, 0.0));
             
             let projection = perspective(
@@ -83,7 +84,7 @@ fn main() {
             shader.set_mat4("projection", &projection);
             
             for segment in level_generator.segments() {
-                let segment_z = segment.position - world.player_z;
+                let segment_z = segment.position - world.z;
                 if segment_z < -25.0 {
                     continue;
                 }
@@ -95,7 +96,7 @@ fn main() {
             
                 // Obstacles
                 for obstacle in &segment.obstacles {
-                    let obstacle_z = obstacle.position.z - world.player_z;
+                    let obstacle_z = obstacle.position.z - world.z;
 					if obstacle_z < -25.0 {
 						continue;
 					}
@@ -114,7 +115,7 @@ fn main() {
             let model = translation(
                 character.position.x,
                 character.position.y,// + 0.5,
-                world.player_z
+                0.0
             );
             shader.set_mat4("model", &model);
             character_mesh.draw();
