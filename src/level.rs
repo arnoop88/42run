@@ -97,24 +97,6 @@ impl LevelGenerator {
 }
 
 impl Obstacle {
-	// pub fn new() -> Self {
-	// 	let obstacle_template = Mesh::cube(Mesh::OBSTACLE_COLOR);
-    //     let mut generator = Self {
-    //         segments: Vec::new(),
-    //         next_z: 0.0,
-    //         segment_length: 20.0,
-	// 		obstacle_template,
-    //     };
-        
-    //     // Generate initial segments
-    //     for _ in 0..Self::VISIBLE_SEGMENTS {
-	// 		generator.generate_segment();
-	// 		generator.next_z += Self::SEGMENT_SPACING;
-    //     }
-        
-    //     generator
-    // }
-
 	pub fn get_aabb(&self) -> AABB {
         let half_width = 0.5;
         AABB {

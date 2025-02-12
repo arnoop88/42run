@@ -71,7 +71,7 @@ fn main() {
 
 			// Camera
 			let eye = Vector3::new(0.0, 3.0, -10.0);
-			let target = Vector3::new(0.0, 1.0, 0.0);
+			let target = Vector3::new(0.0, 1.5, 0.0);
 			let view = math::look_at(eye, target, Vector3::new(0.0, 1.0, 0.0));
             
             let projection = perspective(
