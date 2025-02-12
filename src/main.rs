@@ -3,6 +3,7 @@ mod mesh;
 mod character;
 mod level;
 mod math;
+mod collision;
 
 use glfw::{Action, Context, Key, WindowEvent};
 use mesh::Mesh;
@@ -57,6 +58,8 @@ fn main() {
         world.z += world.speed * delta_time;
 		level_generator.update(world.z);
         world.speed = (world.speed + 0.2 * delta_time).min(50.0);
+		let mut collision_detected = false;
+		let player_aabb = character.get_aabb(world.z);
 		let distance_text = format!("Distance: {:.0}m", world.z);
 		//print!("speed: {}, distance: {}\n", world.speed, distance_text);
 
@@ -94,6 +97,12 @@ fn main() {
             
                 // Obstacles
                 for obstacle in &segment.obstacles {
+					let obstacle_aabb = obstacle.get_aabb();
+					if player_aabb.collides(&obstacle_aabb) {
+						collision_detected = true;
+						break;
+					}
+
                     let obstacle_z = obstacle.position.z - world.z;
 					if obstacle_z < -25.0 {
 						continue;
@@ -107,9 +116,19 @@ fn main() {
                     shader.set_mat4("model", &model);
                     obstacle.mesh.draw();
                 }
+				if collision_detected {
+					break;
+				}
             }
-            
-            // Character using custom translation
+
+			if collision_detected {
+				// Handle collision - example: reset game
+				println!("Game Over! Collision detected");
+				world.z = 0.0;
+				world.speed = 20.0;
+				level_generator = level::LevelGenerator::new();
+			}
+
             let model = translation(
                 character.position.x,
                 character.position.y,// + 0.5,

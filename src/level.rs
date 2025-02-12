@@ -2,6 +2,7 @@ use nalgebra::{Vector3, Point3};
 use rand::Rng;
 use crate::mesh::{Mesh, Vertex};
 use crate::character::Character;
+use crate::collision::AABB;
 
 pub struct LevelSegment {
     pub position: f32,  // Z-axis position
@@ -92,5 +93,41 @@ impl LevelGenerator {
 
     pub fn segments(&self) -> &[LevelSegment] {
         &self.segments
+    }
+}
+
+impl Obstacle {
+	// pub fn new() -> Self {
+	// 	let obstacle_template = Mesh::cube(Mesh::OBSTACLE_COLOR);
+    //     let mut generator = Self {
+    //         segments: Vec::new(),
+    //         next_z: 0.0,
+    //         segment_length: 20.0,
+	// 		obstacle_template,
+    //     };
+        
+    //     // Generate initial segments
+    //     for _ in 0..Self::VISIBLE_SEGMENTS {
+	// 		generator.generate_segment();
+	// 		generator.next_z += Self::SEGMENT_SPACING;
+    //     }
+        
+    //     generator
+    // }
+
+	pub fn get_aabb(&self) -> AABB {
+        let half_width = 0.5;
+        AABB {
+            min: Point3::new(
+                self.position.x - half_width,
+                self.position.y,
+                self.position.z - half_width
+            ),
+            max: Point3::new(
+                self.position.x + half_width,
+                self.position.y + 1.0, // Obstacle height
+                self.position.z + half_width
+            ),
+        }
     }
 }

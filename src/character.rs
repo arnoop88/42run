@@ -1,4 +1,5 @@
 use nalgebra::{Vector3, Point3};
+use crate::collision::AABB;
 
 pub struct Character {
     pub position: Point3<f32>,
@@ -50,6 +51,22 @@ impl Character {
             self.is_grounded = true;
         } else {
             self.is_grounded = false;
+        }
+    }
+
+	pub fn get_aabb(&self, player_z: f32) -> AABB {
+        let half_width = 0.5;
+        AABB {
+            min: Point3::new(
+                self.position.x - half_width,
+                self.position.y,
+                player_z - half_width
+            ),
+            max: Point3::new(
+                self.position.x + half_width,
+                self.position.y + 1.0, // Character height
+                player_z + half_width
+            ),
         }
     }
 
