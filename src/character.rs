@@ -5,13 +5,19 @@ pub struct Character {
     velocity: Vector3<f32>,
     is_grounded: bool,
     lane: i8,
+	target_x: f32,
+    move_speed: f32,
+}
+
+fn lerp(a: f32, b: f32, t: f32) -> f32 {
+    a + (b - a) * t.clamp(0.0, 1.0)
 }
 
 impl Character {
     pub const LANE_WIDTH: f32 = 2.0;
     const JUMP_FORCE: f32 = 10.0;
-    const GRAVITY: f32 = -25.0;
-    const MOVE_SPEED: f32 = 8.0;
+    const GRAVITY: f32 = -35.0;
+	const LANE_CHANGE_SPEED: f32 = 5.0;
 
     pub fn new() -> Self {
         Self {
@@ -19,15 +25,25 @@ impl Character {
             velocity: Vector3::zeros(),
             is_grounded: true,
             lane: 0,
+			target_x: 0.0,  // Initialize target position
+            move_speed: 5.0,
         }
     }
 
     pub fn update(&mut self, delta_time: f32) {
-        // Apply gravity
+        // Lateral movement interpolation
+		let damping = 1.0 - (-Self::LANE_CHANGE_SPEED * delta_time).exp();
+        self.position.x = lerp(
+            self.position.x,
+            self.target_x,
+            damping
+        );
+		
+		// Gravity
         self.velocity.y += Self::GRAVITY * delta_time;
         self.position.y += self.velocity.y * delta_time;
 
-        // Ground collision (platform at Y=0)
+        // Ground collision
         if self.position.y <= 0.0 {
             self.position.y = 0.0;
             self.velocity.y = 0.0;
@@ -47,14 +63,14 @@ impl Character {
     pub fn move_right(&mut self) {
         if self.lane > -1 {
             self.lane -= 1;
-            self.position.x = self.lane as f32 * Self::LANE_WIDTH;
+            self.target_x = self.lane as f32 * Self::LANE_WIDTH;
         }
     }
 
     pub fn move_left(&mut self) {
         if self.lane < 1 {
             self.lane += 1;
-            self.position.x = self.lane as f32 * Self::LANE_WIDTH;
+            self.target_x = self.lane as f32 * Self::LANE_WIDTH;
         }
     }
 }

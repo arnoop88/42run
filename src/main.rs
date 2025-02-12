@@ -1,6 +1,5 @@
 mod shader;
 mod mesh;
-mod camera;
 mod character;
 mod level;
 mod math;
@@ -39,7 +38,6 @@ fn main() {
 
     let character_mesh = Mesh::cube(Mesh::PLAYER_COLOR);
     let mut character = character::Character::new();
-    let mut camera = camera::Camera::new(800.0 / 600.0);
     let mut level_generator = level::LevelGenerator::new();
     let mut world = WorldState {
         speed: 20.0,
@@ -60,7 +58,7 @@ fn main() {
 		level_generator.update(world.z);
         world.speed = (world.speed + 0.2 * delta_time).min(50.0);
 		let distance_text = format!("Distance: {:.0}m", world.z);
-		print!("speed: {}, distance: {}\n", world.speed, distance_text);
+		//print!("speed: {}, distance: {}\n", world.speed, distance_text);
 
         unsafe {
             gl::ClearColor(0.1, 0.1, 0.1, 1.0);
