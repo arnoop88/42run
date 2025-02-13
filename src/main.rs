@@ -48,8 +48,8 @@ fn main() {
     }
 
     let game_shader = shader::Shader::new(
-        "shaders/vertex/basic.glsl",
-        "shaders/fragment/basic.glsl"
+        "shaders/vertex/game.glsl",
+        "shaders/fragment/game.glsl"
     ).expect("Failed to load shaders");
 	let ui_shader = shader::Shader::new(
 		"shaders/vertex/ui.glsl",
