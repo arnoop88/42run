@@ -96,6 +96,11 @@ impl Shader {
 		let location = gl::GetUniformLocation(self.id, cname.as_ptr());
 		gl::Uniform3f(location, vec.x, vec.y, vec.z);
 	}
+
+	pub unsafe fn get_uniform_location(&self, name: &str) -> i32 {
+		let cname = CString::new(name).unwrap();
+		gl::GetUniformLocation(self.id, cname.as_ptr())
+	}
 }
 
 impl Drop for Shader {

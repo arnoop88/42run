@@ -15,8 +15,8 @@ fn lerp(a: f32, b: f32, t: f32) -> f32 {
 
 impl Character {
     pub const LANE_WIDTH: f32 = 2.0;
-    const JUMP_FORCE: f32 = 10.0;
-    const GRAVITY: f32 = -35.0;
+    const JUMP_FORCE: f32 = 8.0;
+    const GRAVITY: f32 = -16.0;
 	const LANE_CHANGE_SPEED: f32 = 5.0;
 
     pub fn new() -> Self {

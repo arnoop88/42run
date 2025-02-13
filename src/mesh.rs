@@ -1,13 +1,13 @@
 use gl::types::*;
-use nalgebra::Vector3;
+use nalgebra::{Vector3, Vector2};
 
-#[derive(Debug)]
+#[derive(Clone)]
 pub struct Vertex {
     pub position: Vector3<f32>,
 	pub color: Vector3<f32>,
+	//pub tex_coords: Vector2<f32>,
 }
 
-#[derive(Debug)]
 pub struct Mesh {
     vao: GLuint,
     vbo: GLuint,
@@ -26,12 +26,10 @@ impl Mesh {
         let mut ebo = 0;
 
         unsafe {
-            // Generate buffers
             gl::GenVertexArrays(1, &mut vao);
             gl::GenBuffers(1, &mut vbo);
             gl::GenBuffers(1, &mut ebo);
 
-            // Bind VAO
             gl::BindVertexArray(vao);
 
             // Bind and fill VBO
@@ -52,27 +50,39 @@ impl Mesh {
                 gl::STATIC_DRAW,
             );
 
-            // Position
-            let pos_location = 0;
-            gl::EnableVertexAttribArray(pos_location as GLuint);
-            gl::VertexAttribPointer(
-                pos_location as GLuint,
-                3,
-                gl::FLOAT,
-                gl::FALSE,
-                std::mem::size_of::<Vertex>() as GLsizei,
-                std::ptr::null(),
-            );
+            // Position (location = 0)
+            gl::EnableVertexAttribArray(0);
+			gl::VertexAttribPointer(
+				0,
+				3,
+				gl::FLOAT,
+				gl::FALSE,
+				std::mem::size_of::<Vertex>() as GLsizei,
+				std::ptr::null(),
+			);
 
-			// Color
+			// Color (location = 1)
 			gl::EnableVertexAttribArray(1);
-            gl::VertexAttribPointer(
-                1, 3, gl::FLOAT, gl::FALSE,
-                std::mem::size_of::<Vertex>() as GLsizei,
-                (3 * std::mem::size_of::<f32>()) as *const _,
-            );
+			gl::VertexAttribPointer(
+				1,
+				3,
+				gl::FLOAT,
+				gl::FALSE,
+				std::mem::size_of::<Vertex>() as GLsizei,
+				(3 * std::mem::size_of::<f32>()) as *const _,
+			);
 
-            // Unbind VAO
+			// // Texture Coordinates (location = 2)
+			// gl::EnableVertexAttribArray(2);
+			// gl::VertexAttribPointer(
+			// 	2,
+			// 	2,
+			// 	gl::FLOAT,
+			// 	gl::FALSE,
+			// 	std::mem::size_of::<Vertex>() as GLsizei,
+			// 	(6 * std::mem::size_of::<f32>()) as *const _,
+			// );
+
             gl::BindVertexArray(0);
         }
 
@@ -148,6 +158,53 @@ impl Mesh {
         let indices = vec![0, 1, 2, 2, 3, 0];
         Mesh::new(&vertices, &indices)
     }
+
+	// pub fn text(text: &str) -> Mesh {
+	// 	let mut vertices = Vec::new();
+	// 	let mut indices = Vec::new();
+	// 	let char_width = 1.0 / 16.0;
+	// 	let char_height = 1.0 / 16.0;
+	// 	let scale = 0.02;  // Smaller scale for better proportion
+	
+	// 	for (i, c) in text.chars().enumerate() {
+	// 		let ascii = c as u32;
+	// 		let grid_x = (ascii % 16) as f32;
+	// 		let grid_y = (ascii / 16) as f32;
+			
+	// 		let u = grid_x * char_width;
+	// 		let v = 1.0 - (grid_y + 1.0) * char_height;  // Flip V coordinate
+			
+	// 		let x = i as f32 * scale * 2.0;  // Adjust spacing
+			
+	// 		vertices.extend_from_slice(&[
+	// 			Vertex {
+	// 				position: Vector3::new(x, 0.0, 0.0),
+	// 				color: Vector3::zeros(),
+	// 				tex_coords: Vector2::new(u, v + char_height),
+	// 			},
+	// 			Vertex {
+	// 				position: Vector3::new(x + scale, 0.0, 0.0),
+	// 				color: Vector3::zeros(),
+	// 				tex_coords: Vector2::new(u + char_width, v + char_height),
+	// 			},
+	// 			Vertex {
+	// 				position: Vector3::new(x + scale, scale, 0.0),
+	// 				color: Vector3::zeros(),
+	// 				tex_coords: Vector2::new(u + char_width, v),
+	// 			},
+	// 			Vertex {
+	// 				position: Vector3::new(x, scale, 0.0),
+	// 				color: Vector3::zeros(),
+	// 				tex_coords: Vector2::new(u, v),
+	// 			},
+	// 		]);
+			
+	// 		let base = (i * 4) as u32;
+	// 		indices.extend_from_slice(&[base, base+1, base+2, base+2, base+3, base]);
+	// 	}
+		
+	// 	Mesh::new(&vertices, &indices)
+	// }
 }
 
 impl Drop for Mesh {

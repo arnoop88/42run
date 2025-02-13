@@ -5,28 +5,38 @@ mod level;
 mod math;
 mod collision;
 mod menu;
+mod controls;
+mod game;
+//mod texture;
 
-use glfw::{Action, Context, Key, WindowEvent, MouseButton};
+use glfw::{Action, Context, WindowEvent, MouseButton};
 use mesh::Mesh;
-use nalgebra::{Vector3};
 use menu::{Menu, MenuAction};
+
+use crate::controls::handle_keys;
+use crate::level::LevelGenerator;
+use crate::game::{new_game, play};
 
 enum GameState {
     Menu,
-    Game,
+    Playing,
+	GameOver,
+	Paused,
 }
 
 struct WorldState {
     speed: f32,
     z: f32,
     last_frame_time: f64,
-    game_state: GameState,
     screen_width: f32,
     screen_height: f32,
     mouse_x: f32,
     mouse_y: f32,
     mouse_clicked: bool,
 	menu: Menu,
+	level: LevelGenerator,
+	pause_start_time: f64,
+    total_pause_time: f64,
 }
 
 fn main() {
@@ -56,20 +66,23 @@ fn main() {
 		"shaders/fragment/ui.glsl"
 	).expect("Failed to load UI shaders");
 
+	//let font_texture = texture::Texture::new("assets/fonts/AndaleMono.png");
     let character_mesh = Mesh::cube(Mesh::PLAYER_COLOR);
+	let mut game_state = GameState::Menu;
     let mut character = character::Character::new();
-    let mut level_generator = level::LevelGenerator::new();
     let mut world = WorldState {
 		speed: 20.0,
 		z: 0.0,
 		last_frame_time: glfw.get_time(),
-		game_state: GameState::Menu,
 		screen_width: 800.0,
 		screen_height: 600.0,
 		mouse_x: 0.0,
 		mouse_y: 0.0,
 		mouse_clicked: false,
 		menu: Menu::new(800.0, 600.0),
+		level: level::LevelGenerator::new(),
+		pause_start_time: 0.0,
+		total_pause_time: 0.0,
     };
 
     while !window.should_close() {
@@ -90,132 +103,40 @@ fn main() {
 						world.mouse_clicked = true;
 					}
 				},
-				_ => handle_window_event(&mut window, event, &mut character),
+				_ => handle_keys(&mut window, event, &mut game_state, &mut character, &mut world, &glfw),
 			}
         }
 
-		match world.game_state {
+		match game_state {
 			GameState::Menu => {
 				unsafe {
 					gl::ClearColor(0.1, 0.1, 0.1, 1.0);//gl::ClearColor(0.2, 0.4, 0.8, 1.0);
 					gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
-					ui_shader.use_program();
 					world.menu.render(&ui_shader);
 				}
 				
 				if world.mouse_clicked {
 					match world.menu.handle_click(world.mouse_x, world.mouse_y) {
-						MenuAction::Play => world.game_state = GameState::Game,
+						MenuAction::Play => new_game(&mut game_state, &mut character, &mut world, &glfw),
 						MenuAction::Quit => window.set_should_close(true),
 						MenuAction::None => {}
 					}
 					world.mouse_clicked = false;
 				}
 			},
-			GameState::Game => {
+			GameState::Playing => {
 				let current_time = glfw.get_time();
-				let delta_time = (current_time - world.last_frame_time) as f32;
-				world.last_frame_time = current_time;
+				let adjusted_time = current_time - world.total_pause_time;
+				let delta_time = (adjusted_time - world.last_frame_time) as f32;
+				world.last_frame_time = adjusted_time;
+				
 				character.update(delta_time);
-				world.z += world.speed * delta_time;
-				level_generator.update(world.z);
-				world.speed = (world.speed + 0.2 * delta_time).min(50.0);
-				let mut collision_detected = false;
-				let player_aabb = character.get_aabb(world.z);
-				//let distance_text = format!("Distance: {:.0}m", world.z);
-				//print!("speed: {}, distance: {}\n", world.speed, distance_text);
-
-				unsafe {
-					gl::ClearColor(0.1, 0.1, 0.1, 1.0);
-					gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
-
-					game_shader.use_program();
-
-					// Camera
-					let eye = Vector3::new(0.0, 3.0, -10.0);
-					let target = Vector3::new(0.0, 1.5, 0.0);
-					let view = math::look_at(eye, target, Vector3::new(0.0, 1.0, 0.0));
-					
-					let projection = math::perspective(
-						45.0f32.to_radians(),
-						800.0 / 600.0,
-						0.1,
-						1000.0
-					);
-
-					game_shader.set_mat4("view", &view);
-					game_shader.set_mat4("projection", &projection);
-					
-					for segment in level_generator.segments() {
-						let segment_z = segment.position - world.z;
-						if segment_z < -25.0 {
-							continue;
-						}
-						
-						// Platform
-						let model = math::translation(0.0, 0.0, segment_z);
-						game_shader.set_mat4("model", &model);
-						segment.platform.draw();
-					
-						// Obstacles
-						for obstacle in &segment.obstacles {
-							let obstacle_aabb = obstacle.get_aabb();
-							if player_aabb.collides(&obstacle_aabb) {
-								collision_detected = true;
-								break;
-							}
-
-							let obstacle_z = obstacle.position.z - world.z;
-							if obstacle_z < -25.0 {
-								continue;
-							}
-							
-							let model = math::translation(
-								obstacle.position.x,
-								obstacle.position.y,
-								obstacle_z
-							);
-							game_shader.set_mat4("model", &model);
-							obstacle.mesh.draw();
-						}
-						if collision_detected {
-							break;
-						}
-					}
-
-					if collision_detected {
-						world.z = 0.0;
-						world.speed = 20.0;
-						character = character::Character::new();
-						level_generator = level::LevelGenerator::new();
-						world.game_state = GameState::Menu;
-					}
-
-					let model = math::translation(
-						character.position.x,
-						character.position.y + 0.5,
-						0.0
-					);
-					game_shader.set_mat4("model", &model);
-					character_mesh.draw();
-				}
+				play(&mut world, &mut character, &mut game_state, &game_shader, &character_mesh, delta_time);
 			}
+			GameState::Paused => {}
+			GameState::GameOver => {}
 		}
         window.swap_buffers();
         glfw.poll_events();
-    }
-}
-
-fn handle_window_event(window: &mut glfw::Window, event: WindowEvent, character: &mut character::Character) {
-	match event {
-        glfw::WindowEvent::Key(Key::Escape, _, Action::Press, _) => window.set_should_close(true),
-        glfw::WindowEvent::Key(Key::Left, _, Action::Press, _) |
-        glfw::WindowEvent::Key(Key::A, _, Action::Press, _) => character.move_left(),
-        glfw::WindowEvent::Key(Key::Right, _, Action::Press, _) |
-        glfw::WindowEvent::Key(Key::D, _, Action::Press, _) => character.move_right(),
-        glfw::WindowEvent::Key(Key::Space, _, Action::Press, _) |
-        glfw::WindowEvent::Key(Key::Up, _, Action::Press, _) |
-        glfw::WindowEvent::Key(Key::W, _, Action::Press, _) => character.jump(),
-        _ => {}
     }
 }
