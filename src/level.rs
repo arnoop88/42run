@@ -1,6 +1,6 @@
-use nalgebra::{Vector3, Point3};
+use nalgebra::{Point3};
 use rand::Rng;
-use crate::mesh::{Mesh, Vertex};
+use crate::mesh::{Mesh};
 use crate::character::Character;
 use crate::collision::AABB;
 
@@ -65,7 +65,7 @@ impl LevelGenerator {
 				mesh: self.create_obstacle_mesh(),
 				position: Point3::new(
 					lane as f32 * Character::LANE_WIDTH,
-					0.0, // 0.5
+					0.5,
 					z_pos + Self::OBSTACLE_OFFSET
 				),
 			});

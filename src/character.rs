@@ -7,7 +7,6 @@ pub struct Character {
     is_grounded: bool,
     lane: i8,
 	target_x: f32,
-    move_speed: f32,
 }
 
 fn lerp(a: f32, b: f32, t: f32) -> f32 {
@@ -26,8 +25,7 @@ impl Character {
             velocity: Vector3::zeros(),
             is_grounded: true,
             lane: 0,
-			target_x: 0.0,  // Initialize target position
-            move_speed: 5.0,
+			target_x: 0.0,
         }
     }
 

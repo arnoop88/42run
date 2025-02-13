@@ -90,6 +90,12 @@ impl Shader {
         let location = gl::GetUniformLocation(self.id, cname.as_ptr());
         gl::UniformMatrix4fv(location, 1, gl::FALSE, mat.as_ptr());
     }
+
+	pub unsafe fn set_vec3(&self, name: &str, vec: &nalgebra::Vector3<f32>) {
+		let cname = CString::new(name).unwrap();
+		let location = gl::GetUniformLocation(self.id, cname.as_ptr());
+		gl::Uniform3f(location, vec.x, vec.y, vec.z);
+	}
 }
 
 impl Drop for Shader {

@@ -1,6 +1,5 @@
 use gl::types::*;
 use nalgebra::Vector3;
-use std::ffi::CString;
 
 #[derive(Debug)]
 pub struct Vertex {
@@ -129,22 +128,26 @@ impl Mesh {
 		];
 
 		let indices = vec![
-			// Front face
 			0, 1, 2, 2, 3, 0,
-			// Back face
 			4, 5, 6, 6, 7, 4,
-			// Left face
 			4, 0, 3, 3, 7, 4,
-			// Right face
 			1, 5, 6, 6, 2, 1,
-			// Top face
-			3, 2, 6, 6, 7, 3,
-			// Bottom face
 			4, 5, 1, 1, 0, 4,
 		];
 
 		Mesh::new(&vertices, &indices)
 	}
+
+	pub fn quad_2d() -> Self {
+        let vertices = vec![
+            Vertex { position: Vector3::new(0.0, 0.0, 0.0), color: Vector3::zeros() },
+            Vertex { position: Vector3::new(1.0, 0.0, 0.0), color: Vector3::zeros() },
+            Vertex { position: Vector3::new(1.0, 1.0, 0.0), color: Vector3::zeros() },
+            Vertex { position: Vector3::new(0.0, 1.0, 0.0), color: Vector3::zeros() },
+        ];
+        let indices = vec![0, 1, 2, 2, 3, 0];
+        Mesh::new(&vertices, &indices)
+    }
 }
 
 impl Drop for Mesh {
