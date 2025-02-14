@@ -62,7 +62,7 @@ impl Character {
             ),
             max: Point3::new(
                 self.position.x + half_width,
-                self.position.y, // Character height
+                self.position.y + half_width, // Character height
                 player_z + half_width
             ),
         }
