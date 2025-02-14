@@ -71,7 +71,7 @@ impl LevelGenerator {
 				mesh: self.create_obstacle_mesh(),
 				position: Point3::new(
 					lane as f32 * Character::LANE_WIDTH,
-					0.5,
+					0.001,
 					z_pos + Self::OBSTACLE_OFFSET
 				),
 			});

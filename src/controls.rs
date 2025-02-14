@@ -17,7 +17,13 @@ pub fn handle_keys(window: &mut glfw::Window, event: WindowEvent, game_state: &m
                     Key::Left | Key::A if action == Action::Press => character.move_left(),
                     Key::Right | Key::D if action == Action::Press => character.move_right(),
                     Key::Space | Key::Up | Key::W if action == Action::Press => character.jump(),
-                    Key::Down | Key::S => character.set_fast_fall(action == Action::Press),
+                    Key::Down | Key::S => {
+						let is_pressed = match action {
+							glfw::Action::Press | glfw::Action::Repeat => true,
+							glfw::Action::Release => false
+						};
+						character.move_down(is_pressed);
+					}
                     _ => {}
                 },
                 GameState::Menu => match key {

@@ -86,9 +86,9 @@ pub fn play(world: &mut WorldState, character: &mut Character, game_state: &mut 
         // Character rendering
         let model = math::translation(
             character.position.x,
-            character.position.y + 0.5,
+            character.position.y + 0.001,
             0.0
-        );
+        ) * math::scaling(1.0, character.current_height, 1.0);
         game_shader.set_mat4("model", &model);
         character_mesh.draw();
 
