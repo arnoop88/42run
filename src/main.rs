@@ -7,12 +7,11 @@ mod collision;
 mod menu;
 mod controls;
 mod game;
-//mod texture;
+mod texture;
 
 use glfw::{Action, Context, WindowEvent, MouseButton};
-use mesh::Mesh;
-use menu::{Menu, MenuAction};
-
+use crate::mesh::Mesh;
+use crate::menu::{Menu, MenuAction};
 use crate::controls::handle_keys;
 use crate::level::LevelGenerator;
 use crate::game::{new_game, play};
@@ -57,16 +56,10 @@ fn main() {
         gl::DepthFunc(gl::LESS);
     }
 
-    let game_shader = shader::Shader::new(
-        "shaders/vertex/game.glsl",
-        "shaders/fragment/game.glsl"
-    ).expect("Failed to load shaders");
-	let ui_shader = shader::Shader::new(
-		"shaders/vertex/ui.glsl",
-		"shaders/fragment/ui.glsl"
-	).expect("Failed to load UI shaders");
+    let game_shader = shader::Shader::new("shaders/vertex/game.glsl", "shaders/fragment/game.glsl").expect("Failed to load shaders");
+	let ui_shader = shader::Shader::new("shaders/vertex/ui.glsl", "shaders/fragment/ui.glsl").expect("Failed to load UI shaders");
+	let text_shader = shader::Shader::new("shaders/vertex/ui_text.glsl", "shaders/fragment/ui_text.glsl").expect("Failed to load text shaders");
 
-	//let font_texture = texture::Texture::new("assets/fonts/AndaleMono.png");
     let character_mesh = Mesh::cube(Mesh::PLAYER_COLOR);
 	let mut game_state = GameState::Menu;
     let mut character = character::Character::new();
@@ -110,9 +103,7 @@ fn main() {
 		match game_state {
 			GameState::Menu => {
 				unsafe {
-					gl::ClearColor(0.1, 0.1, 0.1, 1.0);//gl::ClearColor(0.2, 0.4, 0.8, 1.0);
-					gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
-					world.menu.render(&ui_shader);
+					world.menu.render(&ui_shader, &text_shader);
 				}
 				
 				if world.mouse_clicked {
@@ -129,9 +120,8 @@ fn main() {
 				let adjusted_time = current_time - world.total_pause_time;
 				let delta_time = (adjusted_time - world.last_frame_time) as f32;
 				world.last_frame_time = adjusted_time;
-				
 				character.update(delta_time);
-				play(&mut world, &mut character, &mut game_state, &game_shader, &character_mesh, delta_time);
+				play(&mut world, &mut character, &mut game_state, &game_shader, &character_mesh, &text_shader, delta_time);
 			}
 			GameState::Paused => {}
 			GameState::GameOver => {}

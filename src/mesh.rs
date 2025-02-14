@@ -1,18 +1,19 @@
 use gl::types::*;
 use nalgebra::{Vector3, Vector2};
 
+#[repr(C)]
 #[derive(Clone)]
 pub struct Vertex {
     pub position: Vector3<f32>,
 	pub color: Vector3<f32>,
-	//pub tex_coords: Vector2<f32>,
+	pub tex_coords: Vector2<f32>,
 }
 
 pub struct Mesh {
     vao: GLuint,
     vbo: GLuint,
     ebo: GLuint,
-    indices_count: i32,
+    pub indices_count: i32,
 }
 
 impl Mesh {
@@ -72,16 +73,16 @@ impl Mesh {
 				(3 * std::mem::size_of::<f32>()) as *const _,
 			);
 
-			// // Texture Coordinates (location = 2)
-			// gl::EnableVertexAttribArray(2);
-			// gl::VertexAttribPointer(
-			// 	2,
-			// 	2,
-			// 	gl::FLOAT,
-			// 	gl::FALSE,
-			// 	std::mem::size_of::<Vertex>() as GLsizei,
-			// 	(6 * std::mem::size_of::<f32>()) as *const _,
-			// );
+			// Texture Coordinates (location = 2)
+			gl::EnableVertexAttribArray(2);
+			gl::VertexAttribPointer(
+				2,
+				2,
+				gl::FLOAT,
+				gl::FALSE,
+				std::mem::size_of::<Vertex>() as GLsizei,
+				(6 * std::mem::size_of::<f32>()) as *const _,
+			);
 
             gl::BindVertexArray(0);
         }
@@ -96,10 +97,10 @@ impl Mesh {
 
 	pub fn platform() -> Self {
         let vertices = vec![
-            Vertex { position: Vector3::new(-3.0, 0.0, -20.0), color: Self::ROAD_COLOR },
-            Vertex { position: Vector3::new(3.0, 0.0, -20.0), color: Self::ROAD_COLOR },
-            Vertex { position: Vector3::new(3.0, 0.0, 20.0), color: Self::ROAD_COLOR },
-            Vertex { position: Vector3::new(-3.0, 0.0, 20.0), color: Self::ROAD_COLOR },
+            Vertex { position: Vector3::new(-3.0, 0.0, -20.0), color: Self::ROAD_COLOR, tex_coords: Vector2::zeros() },
+            Vertex { position: Vector3::new(3.0, 0.0, -20.0), color: Self::ROAD_COLOR, tex_coords: Vector2::zeros() },
+            Vertex { position: Vector3::new(3.0, 0.0, 20.0), color: Self::ROAD_COLOR, tex_coords: Vector2::zeros() },
+            Vertex { position: Vector3::new(-3.0, 0.0, 20.0), color: Self::ROAD_COLOR, tex_coords: Vector2::zeros() },
         ];
 
         let indices = vec![
@@ -126,15 +127,15 @@ impl Mesh {
 	pub fn cube(color: Vector3<f32>) -> Self {
 		let vertices = vec![
 			// Front face
-			Vertex { position: Vector3::new(-0.5,  0.0,  0.5), color },
-            Vertex { position: Vector3::new( 0.5,  0.0,  0.5), color },
-            Vertex { position: Vector3::new( 0.5,  0.0, -0.5), color },
-            Vertex { position: Vector3::new(-0.5,  0.0, -0.5), color },
+			Vertex { position: Vector3::new(-0.5,  0.0,  0.5), color, tex_coords: Vector2::zeros() },
+            Vertex { position: Vector3::new( 0.5,  0.0,  0.5), color, tex_coords: Vector2::zeros() },
+            Vertex { position: Vector3::new( 0.5,  0.0, -0.5), color, tex_coords: Vector2::zeros() },
+            Vertex { position: Vector3::new(-0.5,  0.0, -0.5), color, tex_coords: Vector2::zeros() },
 			// Back face
-			Vertex { position: Vector3::new(-0.5,  1.0,  0.5), color },
-			Vertex { position: Vector3::new( 0.5,  1.0,  0.5), color },
-			Vertex { position: Vector3::new( 0.5,  1.0, -0.5), color },
-			Vertex { position: Vector3::new(-0.5,  1.0, -0.5), color },
+			Vertex { position: Vector3::new(-0.5,  1.0,  0.5), color, tex_coords: Vector2::zeros() },
+			Vertex { position: Vector3::new( 0.5,  1.0,  0.5), color, tex_coords: Vector2::zeros() },
+			Vertex { position: Vector3::new( 0.5,  1.0, -0.5), color, tex_coords: Vector2::zeros() },
+			Vertex { position: Vector3::new(-0.5,  1.0, -0.5), color, tex_coords: Vector2::zeros() },
 		];
 
 		let indices = vec![
@@ -150,61 +151,67 @@ impl Mesh {
 
 	pub fn quad_2d() -> Self {
         let vertices = vec![
-            Vertex { position: Vector3::new(0.0, 0.0, 0.0), color: Vector3::zeros() },
-            Vertex { position: Vector3::new(1.0, 0.0, 0.0), color: Vector3::zeros() },
-            Vertex { position: Vector3::new(1.0, 1.0, 0.0), color: Vector3::zeros() },
-            Vertex { position: Vector3::new(0.0, 1.0, 0.0), color: Vector3::zeros() },
+            Vertex { position: Vector3::new(0.0, 0.0, 0.0), color: Vector3::zeros(), tex_coords: Vector2::zeros() },
+            Vertex { position: Vector3::new(1.0, 0.0, 0.0), color: Vector3::zeros(), tex_coords: Vector2::zeros() },
+            Vertex { position: Vector3::new(1.0, 1.0, 0.0), color: Vector3::zeros(), tex_coords: Vector2::zeros() },
+            Vertex { position: Vector3::new(0.0, 1.0, 0.0), color: Vector3::zeros(), tex_coords: Vector2::zeros() },
         ];
         let indices = vec![0, 1, 2, 2, 3, 0];
         Mesh::new(&vertices, &indices)
     }
 
-	// pub fn text(text: &str) -> Mesh {
-	// 	let mut vertices = Vec::new();
-	// 	let mut indices = Vec::new();
-	// 	let char_width = 1.0 / 16.0;
-	// 	let char_height = 1.0 / 16.0;
-	// 	let scale = 0.02;  // Smaller scale for better proportion
+	pub fn text(text: &str) -> Mesh {
+		let mut vertices = Vec::new();
+		let mut indices = Vec::new();
+		let char_width = 1.0 / 16.0;
+		let char_height = 1.0 / 16.0;
+		let scale = 1.0;
+		let mut x_offset = 0.0;
 	
-	// 	for (i, c) in text.chars().enumerate() {
-	// 		let ascii = c as u32;
-	// 		let grid_x = (ascii % 16) as f32;
-	// 		let grid_y = (ascii / 16) as f32;
-			
-	// 		let u = grid_x * char_width;
-	// 		let v = 1.0 - (grid_y + 1.0) * char_height;  // Flip V coordinate
-			
-	// 		let x = i as f32 * scale * 2.0;  // Adjust spacing
-			
-	// 		vertices.extend_from_slice(&[
-	// 			Vertex {
-	// 				position: Vector3::new(x, 0.0, 0.0),
-	// 				color: Vector3::zeros(),
-	// 				tex_coords: Vector2::new(u, v + char_height),
-	// 			},
-	// 			Vertex {
-	// 				position: Vector3::new(x + scale, 0.0, 0.0),
-	// 				color: Vector3::zeros(),
-	// 				tex_coords: Vector2::new(u + char_width, v + char_height),
-	// 			},
-	// 			Vertex {
-	// 				position: Vector3::new(x + scale, scale, 0.0),
-	// 				color: Vector3::zeros(),
-	// 				tex_coords: Vector2::new(u + char_width, v),
-	// 			},
-	// 			Vertex {
-	// 				position: Vector3::new(x, scale, 0.0),
-	// 				color: Vector3::zeros(),
-	// 				tex_coords: Vector2::new(u, v),
-	// 			},
-	// 		]);
-			
-	// 		let base = (i * 4) as u32;
-	// 		indices.extend_from_slice(&[base, base+1, base+2, base+2, base+3, base]);
-	// 	}
-		
-	// 	Mesh::new(&vertices, &indices)
-	// }
+		for (i, c) in text.chars().enumerate() {
+			let ascii = c as u32;
+			// Shift index so that the atlas cell 0 corresponds to ASCII 32.
+			let index = ascii.checked_sub(32).unwrap_or(0);
+			let grid_x = (index % 16) as f32;
+			let grid_y = (index / 16) as f32;
+			// Because texture.rs flips the image vertically, we need to flip the grid Y:
+			let grid_y_effective = 15.0 - grid_y;  // For a 16x16 grid (indices 0..15)
+	
+			let u = grid_x * char_width;
+			let v = grid_y_effective * char_height;
+			let u_right = u + char_width;
+			let v_top = v + char_height;
+	
+			vertices.extend_from_slice(&[
+				Vertex {
+					position: Vector3::new(x_offset, 0.0, 0.0),
+					color: Vector3::zeros(),
+					tex_coords: Vector2::new(u, v),
+				},
+				Vertex {
+					position: Vector3::new(x_offset + scale, 0.0, 0.0),
+					color: Vector3::zeros(),
+					tex_coords: Vector2::new(u_right, v),
+				},
+				Vertex {
+					position: Vector3::new(x_offset + scale, scale, 0.0),
+					color: Vector3::zeros(),
+					tex_coords: Vector2::new(u_right, v_top),
+				},
+				Vertex {
+					position: Vector3::new(x_offset, scale, 0.0),
+					color: Vector3::zeros(),
+					tex_coords: Vector2::new(u, v_top),
+				},
+			]);
+	
+			let base = (i * 4) as u32;
+			indices.extend_from_slice(&[base, base + 1, base + 2, base + 2, base + 3, base]);
+			x_offset += scale * 0.8;
+		}
+	
+		Mesh::new(&vertices, &indices)
+	}
 }
 
 impl Drop for Mesh {

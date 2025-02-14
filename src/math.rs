@@ -9,14 +9,14 @@ pub fn translation(x: f32, y: f32, z: f32) -> Matrix4<f32> {
     )
 }
 
-// pub fn identity() -> Matrix4<f32> {
-//     Matrix4::new(
-//         1.0, 0.0, 0.0, 0.0,
-//         0.0, 1.0, 0.0, 0.0,
-//         0.0, 0.0, 1.0, 0.0,
-//         0.0, 0.0, 0.0, 1.0
-//     )
-// }
+pub fn identity() -> Matrix4<f32> {
+    Matrix4::new(
+        1.0, 0.0, 0.0, 0.0,
+        0.0, 1.0, 0.0, 0.0,
+        0.0, 0.0, 1.0, 0.0,
+        0.0, 0.0, 0.0, 1.0
+    )
+}
 
 pub fn scaling(sx: f32, sy: f32, sz: f32) -> Matrix4<f32> {
     Matrix4::new(

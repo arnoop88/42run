@@ -3,6 +3,9 @@ use crate::character::Character;
 use crate::LevelGenerator;
 use crate::GameState;
 use crate::math;
+use crate::shader::Shader;
+use crate::mesh::Mesh;
+use crate::texture::Texture;
 
 use nalgebra::Vector3;
 
@@ -17,8 +20,8 @@ pub fn new_game(game_state: &mut GameState, character: &mut Character, world: &m
     world.last_frame_time = glfw.get_time();
 }
 
-pub fn play(world: &mut WorldState, character: &mut Character, game_state: &mut GameState, game_shader: &crate::shader::Shader, character_mesh: &crate::mesh::Mesh, delta_time: f32) {
-    world.z += world.speed * delta_time;
+pub fn play(world: &mut WorldState, character: &mut Character, game_state: &mut GameState, game_shader: &Shader, character_mesh: &Mesh, text_shader: &Shader, delta_time: f32) {
+	world.z += world.speed * delta_time;
     world.level.update(world.z);
     world.speed = (world.speed + 0.2 * delta_time).min(50.0);
     
@@ -31,14 +34,13 @@ pub fn play(world: &mut WorldState, character: &mut Character, game_state: &mut 
         gl::ClearColor(0.1, 0.1, 0.1, 1.0);
         gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
 
-        game_shader.use_program();
-
         // Camera setup
         let eye = Vector3::new(0.0, 3.0, -10.0);
         let target = Vector3::new(0.0, 1.5, 0.0);
         let view = math::look_at(eye, target, Vector3::new(0.0, 1.0, 0.0));
-        let projection = math::perspective(45.0f32.to_radians(), 800.0 / 600.0, 0.1, 1000.0);
+        let projection = math::perspective(45.0f32.to_radians(), world.screen_width /  world.screen_height, 0.1, 1000.0);
         
+		game_shader.use_program();
         game_shader.set_mat4("view", &view);
         game_shader.set_mat4("projection", &projection);
 
@@ -76,9 +78,9 @@ pub fn play(world: &mut WorldState, character: &mut Character, game_state: &mut 
                 obstacle.mesh.draw();
             }
             
-            if collision_detected {
-                break;
-            }
+            // if collision_detected { 
+            //     break; // what do i do with the obstacle i got hit by?
+            // }
         }
 
         // Character rendering
@@ -89,6 +91,34 @@ pub fn play(world: &mut WorldState, character: &mut Character, game_state: &mut 
         );
         game_shader.set_mat4("model", &model);
         character_mesh.draw();
+
+		// Distance rendering
+		gl::Disable(gl::DEPTH_TEST);
+        gl::Enable(gl::BLEND);
+        gl::BlendFunc(gl::SRC_ALPHA, gl::ONE_MINUS_SRC_ALPHA);
+
+        let distance_text = format!("{:.0}m", world.z / 10.0);
+        let text_mesh = Mesh::text(&distance_text);
+		let font = Texture::new("assets/fonts/PlayfulTime.png");
+        
+        text_shader.use_program();
+        let ui_projection = math::orthographic(0.0, world.screen_width, 0.0, world.screen_height, -1.0, 1.0);
+        text_shader.set_mat4("projection", &ui_projection);
+        font.bind(0);
+        text_shader.set_vec3("textColor", &Vector3::new(1.0, 1.0, 1.0));
+
+        let text_scale = 40.0;
+        let text_model = math::translation(
+            10.0,
+            world.screen_height - 50.0,
+            0.0
+        ) * math::scaling(text_scale, text_scale, 1.0);
+        
+        text_shader.set_mat4("model", &text_model);
+        text_mesh.draw();
+
+        gl::Disable(gl::BLEND);
+        gl::Enable(gl::DEPTH_TEST);
     }
 
     if collision_detected {
