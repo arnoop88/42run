@@ -57,12 +57,12 @@ impl Character {
         AABB {
             min: Point3::new(
                 self.position.x - half_width,
-                self.position.y,
+                self.position.y + half_width,
                 player_z - half_width
             ),
             max: Point3::new(
                 self.position.x + half_width,
-                self.position.y + 1.0, // Character height
+                self.position.y, // Character height
                 player_z + half_width
             ),
         }
