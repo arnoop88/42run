@@ -5,6 +5,7 @@ pub struct Character {
     pub position: Point3<f32>,
     velocity: Vector3<f32>,
     is_grounded: bool,
+	is_pressing_down: bool,
     lane: i8,
 	target_x: f32,
 }
@@ -16,7 +17,8 @@ fn lerp(a: f32, b: f32, t: f32) -> f32 {
 impl Character {
     pub const LANE_WIDTH: f32 = 2.0;
     const JUMP_FORCE: f32 = 8.0;
-    const GRAVITY: f32 = -16.0;
+    const BASE_GRAVITY: f32 = -16.0;
+	const FAST_FALL_GRAVITY: f32 = -100.0;
 	const LANE_CHANGE_SPEED: f32 = 5.0;
 
     pub fn new() -> Self {
@@ -24,6 +26,7 @@ impl Character {
             position: Point3::new(0.0, 0.0, 0.0),
             velocity: Vector3::zeros(),
             is_grounded: true,
+			is_pressing_down: false,
             lane: 0,
 			target_x: 0.0,
         }
@@ -39,8 +42,13 @@ impl Character {
         );
 		
 		// Gravity
-        self.velocity.y += Self::GRAVITY * delta_time;
-        self.position.y += self.velocity.y * delta_time;
+		let gravity = if self.is_pressing_down && !self.is_grounded {
+            Self::FAST_FALL_GRAVITY
+        } else {
+            Self::BASE_GRAVITY
+        };
+        self.velocity.y += gravity * delta_time;
+		self.position.y += self.velocity.y * delta_time;
 
         // Ground collision
         if self.position.y <= 0.0 {
@@ -66,6 +74,10 @@ impl Character {
                 player_z + half_width
             ),
         }
+    }
+
+	pub fn set_fast_fall(&mut self, state: bool) {
+        self.is_pressing_down = state;
     }
 
     pub fn jump(&mut self) {
