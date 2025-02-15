@@ -13,6 +13,7 @@ pub fn handle_keys(window: &mut glfw::Window, event: WindowEvent, game_state: &m
                     Key::Escape if action == Action::Press => {
                         *game_state = GameState::Paused;
                         world.pause_start_time = glfw.get_time();
+						character.move_down(false);
                     }
                     Key::Left | Key::A if action == Action::Press => character.move_left(),
                     Key::Right | Key::D if action == Action::Press => character.move_right(),

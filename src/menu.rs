@@ -12,16 +12,18 @@ pub enum MenuAction {
 }
 
 pub struct Button {
-    mesh: Mesh,
-    text_mesh: Mesh,
-    position: (f32, f32),
-    size: (f32, f32),
-    color: Vector3<f32>,
+    pub mesh: Mesh,
+    pub text_mesh: Mesh,
+    pub position: (f32, f32),
+    pub size: (f32, f32),
+    pub color: Vector3<f32>,
 }
 
 pub struct Menu {
     buttons: Vec<Button>,
     ui_projection: Matrix4<f32>,
+	screen_width: f32,
+	screen_height: f32,
 }
 
 impl Menu {
@@ -29,32 +31,52 @@ impl Menu {
         let play_button = Button {
             mesh: Mesh::quad_2d(),
 			text_mesh: Mesh::text("PLAY"),
-            position: (screen_width / 2.0 - 200.0, screen_height / 2.0),
-            size: (400.0, 100.0),
-            color: Vector3::new(0.2, 1.0, 0.2),
+            position: (screen_width / 2.0 - 150.0, screen_height / 2.0),
+            size: (300.0, 80.0),
+            color: Vector3::new(0.2, 1.0, 0.3), // green
         };
 
         let quit_button = Button {
             mesh: Mesh::quad_2d(),
-			text_mesh: Mesh::text("EXIT"),
-            position: (screen_width / 2.0 - 200.0, screen_height / 2.0 - 150.0),
-            size: (400.0, 100.0),
-            color: Vector3::new(1.0, 0.2, 0.2),
+			text_mesh: Mesh::text("QUIT"),
+            position: (screen_width / 2.0 - 150.0, screen_height / 2.0 - 130.0),
+            size: (300.0, 80.0),
+            color: Vector3::new(1.0, 0.2, 0.2), // red
         };
 
         Menu {
             buttons: vec![play_button, quit_button],
             ui_projection: orthographic(0.0, screen_width, 0.0, screen_height, -1.0, 1.0),
+			screen_width,
+			screen_height,
         }
     }
 
     pub unsafe fn render(&self, shader: &Shader, text_shader: &Shader) {
-        gl::ClearColor(0.1, 0.1, 0.1, 1.0);//gl::ClearColor(0.2, 0.4, 0.8, 1.0);
+        gl::ClearColor(0.1, 0.1, 0.1, 1.0);
 		gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
 		gl::Disable(gl::DEPTH_TEST);
         gl::Enable(gl::BLEND);
         gl::BlendFunc(gl::SRC_ALPHA, gl::ONE_MINUS_SRC_ALPHA);
 
+		// Title text
+		text_shader.use_program();
+		text_shader.set_mat4("projection", &self.ui_projection);
+		text_shader.set_vec3("textColor", &Vector3::new(0.4, 0.6, 1.0));
+	
+		let font = Texture::new("assets/fonts/SparkyStones.png");
+		font.bind(0);
+	
+		let text_scale = 50.0;
+		let text_mesh = Mesh::text("42RUN");
+		let text_width = text_mesh.indices_count as f32 / 6.0 * text_scale * 0.8;
+		let x = self.screen_width / 2.0 - text_width / 2.0;
+		let y = self.screen_height - 130.0;
+	
+		let text_model = translation(x, y, 0.0) * scaling(text_scale, text_scale, 1.0);
+		text_shader.set_mat4("model", &text_model);
+		text_mesh.draw();
+		
 		shader.use_program();
         shader.set_mat4("projection", &self.ui_projection);
 
@@ -71,11 +93,11 @@ impl Menu {
 			// Button text
 			text_shader.use_program();
 			text_shader.set_mat4("projection", &self.ui_projection);
-			text_shader.set_vec3("textColor", &Vector3::new(0.0, 0.0, 0.0));
+			text_shader.set_vec3("textColor", &Vector3::new(0.1, 0.0, 0.0));
 			let font = Texture::new("assets/fonts/ChrustyRock.png");
 			font.bind(0);
 			let text_scale = 50.0;
-			let text_width = button.text_mesh.indices_count as f32 / 6.0 * text_scale * 0.7;
+			let text_width = button.text_mesh.indices_count as f32 / 6.0 * text_scale * 0.8;
 			let text_model = translation(
 				button.position.0 + button.size.0 / 2.0 - text_width / 2.0,
 				button.position.1 + button.size.1 / 2.0 - text_scale / 2.0,

@@ -61,7 +61,6 @@ pub fn play(world: &mut WorldState, character: &mut Character, game_state: &mut 
                 let obstacle_aabb = obstacle.get_aabb();
                 if player_aabb.collides(&obstacle_aabb) {
                     collision_detected = true;
-                    break;
                 }
 
                 let obstacle_z = obstacle.position.z - world.z;
@@ -77,10 +76,6 @@ pub fn play(world: &mut WorldState, character: &mut Character, game_state: &mut 
                 game_shader.set_mat4("model", &model);
                 obstacle.mesh.draw();
             }
-            
-            // if collision_detected { 
-            //     break; // what do i do with the obstacle i got hit by?
-            // }
         }
 
         // Character rendering

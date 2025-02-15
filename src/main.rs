@@ -8,13 +8,17 @@ mod menu;
 mod controls;
 mod game;
 mod texture;
+mod pause;
+mod game_over;
 
 use glfw::{Action, Context, WindowEvent, MouseButton};
 use crate::mesh::Mesh;
-use crate::menu::{Menu, MenuAction};
 use crate::controls::handle_keys;
 use crate::level::LevelGenerator;
 use crate::game::{new_game, play};
+use crate::menu::{Menu, MenuAction};
+use crate::pause::{Pause, PauseAction};
+use crate::game_over::{GameOver, GameOverAction};
 
 enum GameState {
     Menu,
@@ -33,14 +37,19 @@ struct WorldState {
     mouse_y: f32,
     mouse_clicked: bool,
 	menu: Menu,
+	pause: Pause,
+	game_over: GameOver,
 	level: LevelGenerator,
 	pause_start_time: f64,
     total_pause_time: f64,
+	high_score: f32,
 }
 
 fn main() {
+	const SCREEN_WIDTH: f32 = 800.0;
+	const SCREEN_HEIGHT: f32 = 600.0;
     let mut glfw = glfw::init(glfw::fail_on_errors).unwrap();
-    let (mut window, events) = glfw.create_window(800, 600, "42run", glfw::WindowMode::Windowed)
+    let (mut window, events) = glfw.create_window(SCREEN_WIDTH as u32, SCREEN_HEIGHT as u32, "42run", glfw::WindowMode::Windowed)
         .expect("Failed to create GLFW window");
 
     window.make_current();
@@ -58,7 +67,7 @@ fn main() {
 
     let game_shader = shader::Shader::new("shaders/vertex/game.glsl", "shaders/fragment/game.glsl").expect("Failed to load shaders");
 	let ui_shader = shader::Shader::new("shaders/vertex/ui.glsl", "shaders/fragment/ui.glsl").expect("Failed to load UI shaders");
-	let text_shader = shader::Shader::new("shaders/vertex/ui_text.glsl", "shaders/fragment/ui_text.glsl").expect("Failed to load text shaders");
+	let text_shader = shader::Shader::new("shaders/vertex/text.glsl", "shaders/fragment/text.glsl").expect("Failed to load text shaders");
 
     let character_mesh = Mesh::cube(Mesh::PLAYER_COLOR);
 	let mut game_state = GameState::Menu;
@@ -67,15 +76,18 @@ fn main() {
 		speed: 20.0,
 		z: 0.0,
 		last_frame_time: glfw.get_time(),
-		screen_width: 800.0,
-		screen_height: 600.0,
+		screen_width: SCREEN_WIDTH,
+		screen_height: SCREEN_HEIGHT,
 		mouse_x: 0.0,
 		mouse_y: 0.0,
 		mouse_clicked: false,
-		menu: Menu::new(800.0, 600.0),
+		menu: Menu::new(SCREEN_WIDTH, SCREEN_HEIGHT),
+		pause: Pause::new(SCREEN_WIDTH, SCREEN_HEIGHT),
+		game_over: GameOver::new(SCREEN_WIDTH, SCREEN_HEIGHT),
 		level: level::LevelGenerator::new(),
 		pause_start_time: 0.0,
 		total_pause_time: 0.0,
+		high_score: 0.0,
     };
 
     while !window.should_close() {
@@ -105,7 +117,6 @@ fn main() {
 				unsafe {
 					world.menu.render(&ui_shader, &text_shader);
 				}
-				
 				if world.mouse_clicked {
 					match world.menu.handle_click(world.mouse_x, world.mouse_y) {
 						MenuAction::Play => new_game(&mut game_state, &mut character, &mut world, &glfw),
@@ -123,8 +134,35 @@ fn main() {
 				character.update(delta_time);
 				play(&mut world, &mut character, &mut game_state, &game_shader, &character_mesh, &text_shader, delta_time);
 			}
-			GameState::Paused => {}
-			GameState::GameOver => {}
+			GameState::Paused => {
+				unsafe {
+					world.pause.render(&ui_shader, &text_shader);
+				}
+				if world.mouse_clicked {
+					match world.pause.handle_click(world.mouse_x, world.mouse_y) {
+						PauseAction::Resume => {
+							game_state = GameState::Playing;
+							world.total_pause_time += glfw.get_time() - world.pause_start_time;
+						}
+						PauseAction::Quit => game_state = GameState::Menu,
+						PauseAction::None => {}
+					}
+					world.mouse_clicked = false;
+				}
+			}
+			GameState::GameOver => {
+				unsafe {
+					world.game_over.render(&ui_shader, &text_shader);
+				}
+				if world.mouse_clicked {
+					match world.game_over.handle_click(world.mouse_x, world.mouse_y) {
+						GameOverAction::NewGame => new_game(&mut game_state, &mut character, &mut world, &glfw),
+						GameOverAction::Quit => game_state = GameState::Menu,
+						GameOverAction::None => {}
+					}
+					world.mouse_clicked = false;
+				}
+			}
 		}
         window.swap_buffers();
         glfw.poll_events();

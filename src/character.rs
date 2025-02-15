@@ -51,6 +51,7 @@ impl Character {
             damping
         );
 
+		// Squatting
 		if self.is_grounded {
             self.target_height = if self.is_pressing_down {
                 self.squat_height
