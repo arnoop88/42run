@@ -23,7 +23,7 @@ pub fn new_game(game_state: &mut GameState, character: &mut Character, world: &m
 pub fn play(world: &mut WorldState, character: &mut Character, game_state: &mut GameState, game_shader: &Shader, character_mesh: &Mesh, text_shader: &Shader, delta_time: f32) {
 	world.z += world.speed * delta_time;
     world.level.update(world.z);
-    world.speed = (world.speed + 0.2 * delta_time).min(50.0);
+    world.speed = (world.speed + 0.3 * delta_time).min(70.0);
     
     character.update(delta_time);
     
