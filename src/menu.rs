@@ -76,9 +76,6 @@ impl Menu {
 		let text_model = translation(x, y, 0.0) * scaling(text_scale, text_scale, 1.0);
 		text_shader.set_mat4("model", &text_model);
 		text_mesh.draw();
-		
-		shader.use_program();
-        shader.set_mat4("projection", &self.ui_projection);
 
         for button in &self.buttons {
 			// Button background

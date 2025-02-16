@@ -18,12 +18,12 @@ pub fn new_game(game_state: &mut GameState, character: &mut Character, world: &m
 	world.total_pause_time = 0.0;
     world.pause_start_time = 0.0;
     world.last_frame_time = glfw.get_time();
+	world.record = false;
 }
 
 pub fn play(world: &mut WorldState, character: &mut Character, game_state: &mut GameState, game_shader: &Shader, character_mesh: &Mesh, text_shader: &Shader, delta_time: f32) {
 	world.z += world.speed * delta_time;
     world.level.update(world.z);
-    world.speed = (world.speed + 0.3 * delta_time).min(70.0);
     
     character.update(delta_time);
     
@@ -92,7 +92,7 @@ pub fn play(world: &mut WorldState, character: &mut Character, game_state: &mut 
         gl::Enable(gl::BLEND);
         gl::BlendFunc(gl::SRC_ALPHA, gl::ONE_MINUS_SRC_ALPHA);
 
-        let distance_text = format!("{:.0}m", world.z / 10.0);
+        let distance_text = format!("{}m", world.z as i32 / 10);
         let text_mesh = Mesh::text(&distance_text);
 		let font = Texture::new("assets/fonts/PlayfulTime.png");
         
@@ -100,7 +100,7 @@ pub fn play(world: &mut WorldState, character: &mut Character, game_state: &mut 
         let ui_projection = math::orthographic(0.0, world.screen_width, 0.0, world.screen_height, -1.0, 1.0);
         text_shader.set_mat4("projection", &ui_projection);
         font.bind(0);
-        text_shader.set_vec3("textColor", &Vector3::new(1.0, 1.0, 1.0));
+        text_shader.set_vec3("textColor", &Vector3::new(0.9, 0.9, 0.9));
 
         let text_scale = 40.0;
         let text_model = math::translation(

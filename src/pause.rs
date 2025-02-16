@@ -63,9 +63,6 @@ impl Pause {
 		text_shader.set_mat4("model", &text_model);
 		text_mesh.draw();
 
-		shader.use_program();
-        shader.set_mat4("projection", &self.ui_projection);
-
         for button in &self.buttons {
 			// Button background
 			shader.use_program();

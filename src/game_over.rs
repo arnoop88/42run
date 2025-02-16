@@ -4,6 +4,7 @@ use crate::math::{translation, scaling, orthographic};
 use crate::shader::Shader;
 use crate::mesh::Mesh;
 use crate::texture::Texture;
+use crate::WorldState;
 
 pub enum GameOverAction {
 	NewGame,
@@ -37,10 +38,15 @@ impl GameOver {
 	
 		let buttons = vec![resume_button, quit_button];
 		let ui_projection = orthographic(0.0, screen_width, 0.0, screen_height, -1.0, 1.0);
-		GameOver { buttons, ui_projection, screen_width, screen_height }
+		GameOver {
+			buttons,
+			ui_projection,
+			screen_width,
+			screen_height
+		}
 	}
 	
-	pub unsafe fn render(&self, shader: &Shader, text_shader: &Shader) {
+	pub unsafe fn render(&self, shader: &Shader, text_shader: &Shader, high_score: i32, record: bool) {
 		gl::Disable(gl::DEPTH_TEST);
         gl::Enable(gl::BLEND);
         gl::BlendFunc(gl::SRC_ALPHA, gl::ONE_MINUS_SRC_ALPHA);
@@ -54,17 +60,39 @@ impl GameOver {
 		font.bind(0);
 	
 		let text_scale = 50.0;
-		let text_mesh = Mesh::text("GAME OVER");
+		let mut text_mesh = Mesh::text("GAME OVER");
 		let text_width = text_mesh.indices_count as f32 / 6.0 * text_scale * 0.8;
 		let x = self.screen_width / 2.0 - text_width / 2.0;
-		let y = self.screen_height - 130.0;
+		let y = self.screen_height - 110.0;
 	
 		let text_model = translation(x, y, 0.0) * scaling(text_scale, text_scale, 1.0);
 		text_shader.set_mat4("model", &text_model);
 		text_mesh.draw();
 
-		shader.use_program();
-        shader.set_mat4("projection", &self.ui_projection);
+        text_mesh = if record {
+            Mesh::text("NEW HIGH SCORE!")
+        } else {
+            Mesh::text(&format!("HIGH SCORE: {}m", high_score))
+        };
+
+		let font = Texture::new("assets/fonts/SparkyStones.png");
+		font.bind(0);
+
+        let score_scale = 40.0;
+        let score_width = text_mesh.indices_count as f32 / 6.0 * score_scale * 0.8;
+        let score_model = translation(
+            self.screen_width / 2.0 - score_width / 2.0,
+            y - 65.0,
+            0.0
+        ) * scaling(score_scale, score_scale, 1.0);
+
+        text_shader.set_mat4("model", &score_model);
+        if record {
+			text_shader.set_vec3("textColor", &Vector3::new(0.9, 0.9, 0.0))
+		} else {
+			text_shader.set_vec3("textColor", &Vector3::new(0.8, 0.8, 0.8))
+		}
+        text_mesh.draw();
 
         for button in &self.buttons {
 			// Button background

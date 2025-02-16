@@ -42,7 +42,8 @@ struct WorldState {
 	level: LevelGenerator,
 	pause_start_time: f64,
     total_pause_time: f64,
-	high_score: f32,
+	high_score: i32,
+	record: bool,
 }
 
 fn main() {
@@ -87,7 +88,8 @@ fn main() {
 		level: level::LevelGenerator::new(),
 		pause_start_time: 0.0,
 		total_pause_time: 0.0,
-		high_score: 0.0,
+		high_score: 0,
+		record: false,
     };
 
     while !window.should_close() {
@@ -151,8 +153,12 @@ fn main() {
 				}
 			}
 			GameState::GameOver => {
+				if world.z as i32 / 10 > world.high_score {
+					world.high_score = world.z as i32 / 10;
+					world.record = true;
+				}
 				unsafe {
-					world.game_over.render(&ui_shader, &text_shader);
+					world.game_over.render(&ui_shader, &text_shader, world.high_score, world.record);
 				}
 				if world.mouse_clicked {
 					match world.game_over.handle_click(world.mouse_x, world.mouse_y) {
