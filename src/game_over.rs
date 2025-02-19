@@ -56,10 +56,10 @@ impl GameOver {
 		text_shader.set_mat4("projection", &self.ui_projection);
 		text_shader.set_vec3("textColor", &Vector3::new(1.0, 0.2, 0.2));
 	
-		let font = Texture::new("assets/fonts/ChrustyRock.png");
+		let font = Texture::new("assets/fonts/MinecraftRegular.png");
 		font.bind(0);
 	
-		let text_scale = 50.0;
+		let text_scale = 60.0;
 		let mut text_mesh = Mesh::text("GAME OVER");
 		let text_width = text_mesh.indices_count as f32 / 6.0 * text_scale * 0.8;
 		let x = self.screen_width / 2.0 - text_width / 2.0;
@@ -75,7 +75,7 @@ impl GameOver {
             Mesh::text(&format!("HIGH SCORE: {}m", high_score))
         };
 
-		let font = Texture::new("assets/fonts/SparkyStones.png");
+		let font = Texture::new("assets/fonts/MinecraftRegular.png");
 		font.bind(0);
 
         let score_scale = 40.0;

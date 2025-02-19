@@ -10,7 +10,7 @@ pub fn handle_keys(window: &mut glfw::Window, event: WindowEvent, game_state: &m
         glfw::WindowEvent::Key(key, _, action, _) => {
             match game_state {
                 GameState::Playing => match key {
-                    Key::Escape if action == Action::Press => {
+                    Key::Escape | Key::Q if action == Action::Press => {
                         *game_state = GameState::Paused;
                         world.pause_start_time = glfw.get_time();
 						character.move_down(false);
@@ -33,16 +33,16 @@ pub fn handle_keys(window: &mut glfw::Window, event: WindowEvent, game_state: &m
                     _ => {}
                 },
                 GameState::Paused => match key {
-					Key::Escape if action == Action::Press => *game_state = GameState::Menu,
-                    Key::Enter if action == Action::Press => {
+					Key::Escape | Key::Q if action == Action::Press => *game_state = GameState::Menu,
+                    Key::Enter | Key::R if action == Action::Press => {
 						*game_state = GameState::Playing;
 						world.total_pause_time += glfw.get_time() - world.pause_start_time;
 					}
                     _ => {}
                 },
                 GameState::GameOver => match key {
-                    Key::Escape if action == Action::Press => *game_state = GameState::Menu,
-					Key::Enter if action == Action::Press => new_game(game_state, character, world, glfw),
+                    Key::Escape | Key::Q if action == Action::Press => *game_state = GameState::Menu,
+					Key::Enter | Key::R if action == Action::Press => new_game(game_state, character, world, glfw),
                     _ => {}
                 },
             }

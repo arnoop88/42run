@@ -1,4 +1,5 @@
 use nalgebra::{Vector3, Point3};
+use crate::LevelGenerator;
 use crate::collision::AABB;
 
 pub struct Character {
@@ -20,7 +21,6 @@ fn lerp(a: f32, b: f32, t: f32) -> f32 {
 }
 
 impl Character {
-    pub const LANE_WIDTH: f32 = 2.0;
     const JUMP_FORCE: f32 = 8.0;
     const BASE_GRAVITY: f32 = -16.0;
 	const FAST_FALL_GRAVITY: f32 = -100.0;
@@ -120,14 +120,14 @@ impl Character {
     pub fn move_right(&mut self) {
         if self.lane > -1 {
             self.lane -= 1;
-            self.target_x = self.lane as f32 * Self::LANE_WIDTH;
+            self.target_x = self.lane as f32 * LevelGenerator::LANE_WIDTH;
         }
     }
 
     pub fn move_left(&mut self) {
         if self.lane < 1 {
             self.lane += 1;
-            self.target_x = self.lane as f32 * Self::LANE_WIDTH;
+            self.target_x = self.lane as f32 * LevelGenerator::LANE_WIDTH;
         }
     }
 }

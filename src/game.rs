@@ -6,6 +6,7 @@ use crate::math;
 use crate::shader::Shader;
 use crate::mesh::Mesh;
 use crate::texture::Texture;
+use crate::level::ObstacleType;
 
 use nalgebra::Vector3;
 
@@ -24,6 +25,7 @@ pub fn new_game(game_state: &mut GameState, character: &mut Character, world: &m
 pub fn play(world: &mut WorldState, character: &mut Character, game_state: &mut GameState, game_shader: &Shader, character_mesh: &Mesh, text_shader: &Shader, delta_time: f32) {
 	world.z += world.speed * delta_time;
     world.level.update(world.z);
+	world.speed = (world.speed + 0.3 * delta_time).min(50.0);
     
     character.update(delta_time);
     
@@ -54,7 +56,26 @@ pub fn play(world: &mut WorldState, character: &mut Character, game_state: &mut 
             // Platform rendering
             let model = math::translation(0.0, 0.0, segment_z);
             game_shader.set_mat4("model", &model);
+			game_shader.set_int("texture_diffuse", 0);
+			world.textures["floor"].bind(0);
             segment.platform.draw();
+
+			// Left wall
+			let wall_model = math::translation(3.0, 0.0, segment_z);
+			game_shader.set_mat4("model", &wall_model);
+			world.textures["wall"].bind(0);
+			segment.wall.draw();
+
+			// Right wall
+			let wall_model = math::translation(-3.0, 0.0, segment_z);
+			game_shader.set_mat4("model", &wall_model);
+			segment.wall.draw();
+
+			// Ceiling
+			let ceiling_model = math::translation(0.0, 5.0, segment_z);
+			game_shader.set_mat4("model", &ceiling_model);
+			world.textures["ceiling"].bind(0);
+			segment.platform.draw();
 
             // Obstacle handling
             for obstacle in &segment.obstacles {
@@ -74,6 +95,12 @@ pub fn play(world: &mut WorldState, character: &mut Character, game_state: &mut 
                     obstacle_z
                 );
                 game_shader.set_mat4("model", &model);
+				match obstacle.obstacle_type {
+					ObstacleType::Cube => world.textures["obstacle"].bind(0),
+					ObstacleType::WideRectangle => world.textures["wideObstacle"].bind(0),
+					ObstacleType::TallPillar => world.textures["tallPillar"].bind(0),
+					ObstacleType::LowBar => world.textures["lowBar"].bind(0),
+				}
                 obstacle.mesh.draw();
             }
         }
@@ -85,6 +112,7 @@ pub fn play(world: &mut WorldState, character: &mut Character, game_state: &mut 
             0.0
         ) * math::scaling(1.0, character.current_height, 1.0);
         game_shader.set_mat4("model", &model);
+		world.textures["character"].bind(0);
         character_mesh.draw();
 
 		// Distance rendering

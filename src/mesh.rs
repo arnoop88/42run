@@ -96,20 +96,16 @@ impl Mesh {
     }
 
 	pub fn platform() -> Self {
-        let vertices = vec![
-            Vertex { position: Vector3::new(-3.0, 0.0, -20.0), color: Self::ROAD_COLOR, tex_coords: Vector2::zeros() },
-            Vertex { position: Vector3::new(3.0, 0.0, -20.0), color: Self::ROAD_COLOR, tex_coords: Vector2::zeros() },
-            Vertex { position: Vector3::new(3.0, 0.0, 20.0), color: Self::ROAD_COLOR, tex_coords: Vector2::zeros() },
-            Vertex { position: Vector3::new(-3.0, 0.0, 20.0), color: Self::ROAD_COLOR, tex_coords: Vector2::zeros() },
-        ];
-
-        let indices = vec![
-            0, 1, 2,
-            2, 3, 0,
-        ];
-
-        Mesh::new(&vertices, &indices)
-    }
+		let vertices = vec![
+			Vertex { position: Vector3::new(-3.0, 0.0, -20.0), color: Vector3::zeros(), tex_coords: Vector2::new(0.0, 0.0) },
+			Vertex { position: Vector3::new(3.0, 0.0, -20.0), color: Vector3::zeros(), tex_coords: Vector2::new(1.0, 0.0) },
+			Vertex { position: Vector3::new(3.0, 0.0, 20.0), color: Vector3::zeros(), tex_coords: Vector2::new(1.0, 4.0) },
+			Vertex { position: Vector3::new(-3.0, 0.0, 20.0), color: Vector3::zeros(), tex_coords: Vector2::new(0.0, 4.0) },
+		];
+	
+		let indices = vec![0, 1, 2, 2, 3, 0];
+		Mesh::new(&vertices, &indices)
+	}
 
     pub fn draw(&self) {
         unsafe {
@@ -127,25 +123,191 @@ impl Mesh {
 	pub fn cube(color: Vector3<f32>) -> Self {
 		let vertices = vec![
 			// Front face
-			Vertex { position: Vector3::new(-0.5,  0.0,  0.5), color, tex_coords: Vector2::zeros() },
-            Vertex { position: Vector3::new( 0.5,  0.0,  0.5), color, tex_coords: Vector2::zeros() },
-            Vertex { position: Vector3::new( 0.5,  0.0, -0.5), color, tex_coords: Vector2::zeros() },
-            Vertex { position: Vector3::new(-0.5,  0.0, -0.5), color, tex_coords: Vector2::zeros() },
+			Vertex { position: Vector3::new(-0.5, 0.0, 0.5), color, tex_coords: Vector2::new(0.0, 0.0) },
+			Vertex { position: Vector3::new(0.5, 0.0, 0.5), color, tex_coords: Vector2::new(1.0, 0.0) },
+			Vertex { position: Vector3::new(0.5, 1.0, 0.5), color, tex_coords: Vector2::new(1.0, 1.0) },
+			Vertex { position: Vector3::new(-0.5, 1.0, 0.5), color, tex_coords: Vector2::new(0.0, 1.0) },
 			// Back face
-			Vertex { position: Vector3::new(-0.5,  1.0,  0.5), color, tex_coords: Vector2::zeros() },
-			Vertex { position: Vector3::new( 0.5,  1.0,  0.5), color, tex_coords: Vector2::zeros() },
-			Vertex { position: Vector3::new( 0.5,  1.0, -0.5), color, tex_coords: Vector2::zeros() },
-			Vertex { position: Vector3::new(-0.5,  1.0, -0.5), color, tex_coords: Vector2::zeros() },
+			Vertex { position: Vector3::new(-0.5, 0.0, -0.5), color, tex_coords: Vector2::new(1.0, 0.0) },
+			Vertex { position: Vector3::new(0.5, 0.0, -0.5), color, tex_coords: Vector2::new(0.0, 0.0) },
+			Vertex { position: Vector3::new(0.5, 1.0, -0.5), color, tex_coords: Vector2::new(0.0, 1.0) },
+			Vertex { position: Vector3::new(-0.5, 1.0, -0.5), color, tex_coords: Vector2::new(1.0, 1.0) },
+			// Left face
+			Vertex { position: Vector3::new(-0.5, 0.0, -0.5), color, tex_coords: Vector2::new(0.0, 0.0) },
+			Vertex { position: Vector3::new(-0.5, 0.0, 0.5), color, tex_coords: Vector2::new(1.0, 0.0) },
+			Vertex { position: Vector3::new(-0.5, 1.0, 0.5), color, tex_coords: Vector2::new(1.0, 1.0) },
+			Vertex { position: Vector3::new(-0.5, 1.0, -0.5), color, tex_coords: Vector2::new(0.0, 1.0) },
+			// Right face
+			Vertex { position: Vector3::new(0.5, 0.0, 0.5), color, tex_coords: Vector2::new(0.0, 0.0) },
+			Vertex { position: Vector3::new(0.5, 0.0, -0.5), color, tex_coords: Vector2::new(1.0, 0.0) },
+			Vertex { position: Vector3::new(0.5, 1.0, -0.5), color, tex_coords: Vector2::new(1.0, 1.0) },
+			Vertex { position: Vector3::new(0.5, 1.0, 0.5), color, tex_coords: Vector2::new(0.0, 1.0) },
+			// Top face
+			Vertex { position: Vector3::new(-0.5, 1.0, 0.5), color, tex_coords: Vector2::new(0.0, 0.0) },
+			Vertex { position: Vector3::new(0.5, 1.0, 0.5), color, tex_coords: Vector2::new(1.0, 0.0) },
+			Vertex { position: Vector3::new(0.5, 1.0, -0.5), color, tex_coords: Vector2::new(1.0, 1.0) },
+			Vertex { position: Vector3::new(-0.5, 1.0, -0.5), color, tex_coords: Vector2::new(0.0, 1.0) },
+			// Bottom face
+			Vertex { position: Vector3::new(-0.5, 0.0, -0.5), color, tex_coords: Vector2::new(0.0, 0.0) },
+			Vertex { position: Vector3::new(0.5, 0.0, -0.5), color, tex_coords: Vector2::new(1.0, 0.0) },
+			Vertex { position: Vector3::new(0.5, 0.0, 0.5), color, tex_coords: Vector2::new(1.0, 1.0) },
+			Vertex { position: Vector3::new(-0.5, 0.0, 0.5), color, tex_coords: Vector2::new(0.0, 1.0) },
 		];
-
 		let indices = vec![
 			0, 1, 2, 2, 3, 0,
 			4, 5, 6, 6, 7, 4,
-			4, 0, 3, 3, 7, 4,
-			1, 5, 6, 6, 2, 1,
-			4, 5, 1, 1, 0, 4,
+			8, 9, 10, 10, 11, 8,
+			12, 13, 14, 14, 15, 12,
+			16, 17, 18, 18, 19, 16,
+			20, 21, 22, 22, 23, 20,
 		];
+		Mesh::new(&vertices, &indices)
+	}
 
+	pub fn wide_rectangle() -> Self {
+		let color = Vector3::new(1.0, 0.5, 0.0); // Orange color
+		let vertices = vec![
+			// Front face
+			Vertex { position: Vector3::new(-3.0, 0.0, 0.5), color, tex_coords: Vector2::new(0.0, 0.0) },
+			Vertex { position: Vector3::new(3.0, 0.0, 0.5), color, tex_coords: Vector2::new(6.0, 0.0) },
+			Vertex { position: Vector3::new(3.0, 1.0, 0.5), color, tex_coords: Vector2::new(6.0, 1.0) },
+			Vertex { position: Vector3::new(-3.0, 1.0, 0.5), color, tex_coords: Vector2::new(0.0, 1.0) },
+			// Back face
+			Vertex { position: Vector3::new(-3.0, 0.0, -0.5), color, tex_coords: Vector2::new(6.0, 0.0) },
+			Vertex { position: Vector3::new(3.0, 0.0, -0.5), color, tex_coords: Vector2::new(0.0, 0.0) },
+			Vertex { position: Vector3::new(3.0, 1.0, -0.5), color, tex_coords: Vector2::new(0.0, 1.0) },
+			Vertex { position: Vector3::new(-3.0, 1.0, -0.5), color, tex_coords: Vector2::new(6.0, 1.0) },
+			// Left face
+			Vertex { position: Vector3::new(-3.0, 0.0, -0.5), color, tex_coords: Vector2::new(0.0, 0.0) },
+			Vertex { position: Vector3::new(-3.0, 0.0, 0.5), color, tex_coords: Vector2::new(1.0, 0.0) },
+			Vertex { position: Vector3::new(-3.0, 1.0, 0.5), color, tex_coords: Vector2::new(1.0, 1.0) },
+			Vertex { position: Vector3::new(-3.0, 1.0, -0.5), color, tex_coords: Vector2::new(0.0, 1.0) },
+			// Right face
+			Vertex { position: Vector3::new(3.0, 0.0, 0.5), color, tex_coords: Vector2::new(0.0, 0.0) },
+			Vertex { position: Vector3::new(3.0, 0.0, -0.5), color, tex_coords: Vector2::new(1.0, 0.0) },
+			Vertex { position: Vector3::new(3.0, 1.0, -0.5), color, tex_coords: Vector2::new(1.0, 1.0) },
+			Vertex { position: Vector3::new(3.0, 1.0, 0.5), color, tex_coords: Vector2::new(0.0, 1.0) },
+			// Top face
+			Vertex { position: Vector3::new(-3.0, 1.0, 0.5), color, tex_coords: Vector2::new(0.0, 0.0) },
+			Vertex { position: Vector3::new(3.0, 1.0, 0.5), color, tex_coords: Vector2::new(6.0, 0.0) },
+			Vertex { position: Vector3::new(3.0, 1.0, -0.5), color, tex_coords: Vector2::new(6.0, 1.0) },
+			Vertex { position: Vector3::new(-3.0, 1.0, -0.5), color, tex_coords: Vector2::new(0.0, 1.0) },
+			// Bottom face
+			Vertex { position: Vector3::new(-3.0, 0.0, -0.5), color, tex_coords: Vector2::new(0.0, 0.0) },
+			Vertex { position: Vector3::new(3.0, 0.0, -0.5), color, tex_coords: Vector2::new(6.0, 0.0) },
+			Vertex { position: Vector3::new(3.0, 0.0, 0.5), color, tex_coords: Vector2::new(6.0, 1.0) },
+			Vertex { position: Vector3::new(-3.0, 0.0, 0.5), color, tex_coords: Vector2::new(0.0, 1.0) }
+		];
+		let indices = vec![
+			0, 1, 2, 2, 3, 0,
+			4, 5, 6, 6, 7, 4,
+			8, 9, 10, 10, 11, 8,
+			12, 13, 14, 14, 15, 12,
+			16, 17, 18, 18, 19, 16,
+			20, 21, 22, 22, 23, 20
+		];
+		Mesh::new(&vertices, &indices)
+	}
+
+	pub fn tall_pillar() -> Self {
+		let color = Vector3::new(0.2, 0.2, 0.8); // Blue color
+		let vertices = vec![
+			// Front face
+			Vertex { position: Vector3::new(-2.0, 0.0, 0.5), color, tex_coords: Vector2::new(0.0, 0.0) },
+			Vertex { position: Vector3::new(2.0, 0.0, 0.5), color, tex_coords: Vector2::new(4.0, 0.0) },
+			Vertex { position: Vector3::new(2.0, 2.0, 0.5), color, tex_coords: Vector2::new(4.0, 2.0) },
+			Vertex { position: Vector3::new(-2.0, 2.0, 0.5), color, tex_coords: Vector2::new(0.0, 2.0) },
+			// Back face
+			Vertex { position: Vector3::new(-2.0, 0.0, -0.5), color, tex_coords: Vector2::new(4.0, 0.0) },
+			Vertex { position: Vector3::new(2.0, 0.0, -0.5), color, tex_coords: Vector2::new(0.0, 0.0) },
+			Vertex { position: Vector3::new(2.0, 2.0, -0.5), color, tex_coords: Vector2::new(0.0, 2.0) },
+			Vertex { position: Vector3::new(-2.0, 2.0, -0.5), color, tex_coords: Vector2::new(4.0, 2.0) },
+			// Left face
+			Vertex { position: Vector3::new(-2.0, 0.0, -0.5), color, tex_coords: Vector2::new(0.0, 0.0) },
+			Vertex { position: Vector3::new(-2.0, 0.0, 0.5), color, tex_coords: Vector2::new(1.0, 0.0) },
+			Vertex { position: Vector3::new(-2.0, 2.0, 0.5), color, tex_coords: Vector2::new(1.0, 2.0) },
+			Vertex { position: Vector3::new(-2.0, 2.0, -0.5), color, tex_coords: Vector2::new(0.0, 2.0) },
+			// Right face
+			Vertex { position: Vector3::new(2.0, 0.0, 0.5), color, tex_coords: Vector2::new(0.0, 0.0) },
+			Vertex { position: Vector3::new(2.0, 0.0, -0.5), color, tex_coords: Vector2::new(1.0, 0.0) },
+			Vertex { position: Vector3::new(2.0, 2.0, -0.5), color, tex_coords: Vector2::new(1.0, 2.0) },
+			Vertex { position: Vector3::new(2.0, 2.0, 0.5), color, tex_coords: Vector2::new(0.0, 2.0) },
+			// Top face
+			Vertex { position: Vector3::new(-2.0, 2.0, 0.5), color, tex_coords: Vector2::new(0.0, 0.0) },
+			Vertex { position: Vector3::new(2.0, 2.0, 0.5), color, tex_coords: Vector2::new(4.0, 0.0) },
+			Vertex { position: Vector3::new(2.0, 2.0, -0.5), color, tex_coords: Vector2::new(4.0, 1.0) },
+			Vertex { position: Vector3::new(-2.0, 2.0, -0.5), color, tex_coords: Vector2::new(0.0, 1.0) },
+			// Bottom face
+			Vertex { position: Vector3::new(-2.0, 0.0, -0.5), color, tex_coords: Vector2::new(0.0, 0.0) },
+			Vertex { position: Vector3::new(2.0, 0.0, -0.5), color, tex_coords: Vector2::new(4.0, 0.0) },
+			Vertex { position: Vector3::new(2.0, 0.0, 0.5), color, tex_coords: Vector2::new(4.0, 1.0) },
+			Vertex { position: Vector3::new(-2.0, 0.0, 0.5), color, tex_coords: Vector2::new(0.0, 1.0) },
+		];
+		let indices = vec![
+			0, 1, 2, 2, 3, 0,
+			4, 5, 6, 6, 7, 4,
+			8, 9, 10, 10, 11, 8,
+			12, 13, 14, 14, 15, 12,
+			16, 17, 18, 18, 19, 16,
+			20, 21, 22, 22, 23, 20,
+		];
+		Mesh::new(&vertices, &indices)
+	}
+
+	pub fn low_bar() -> Self {
+		let color = Vector3::new(1.0, 0.5, 0.0); // Orange color
+		let vertices = vec![
+			// Front face
+			Vertex { position: Vector3::new(-3.0, 0.0, 0.5), color, tex_coords: Vector2::new(0.0, 0.0) },
+			Vertex { position: Vector3::new(3.0, 0.0, 0.5), color, tex_coords: Vector2::new(6.0, 0.0) },
+			Vertex { position: Vector3::new(3.0, 1.0, 0.5), color, tex_coords: Vector2::new(6.0, 1.0) },
+			Vertex { position: Vector3::new(-3.0, 1.0, 0.5), color, tex_coords: Vector2::new(0.0, 1.0) },
+			// Back face
+			Vertex { position: Vector3::new(-3.0, 0.0, -0.5), color, tex_coords: Vector2::new(6.0, 0.0) },
+			Vertex { position: Vector3::new(3.0, 0.0, -0.5), color, tex_coords: Vector2::new(0.0, 0.0) },
+			Vertex { position: Vector3::new(3.0, 1.0, -0.5), color, tex_coords: Vector2::new(0.0, 1.0) },
+			Vertex { position: Vector3::new(-3.0, 1.0, -0.5), color, tex_coords: Vector2::new(6.0, 1.0) },
+			// Left face
+			Vertex { position: Vector3::new(-3.0, 0.0, -0.5), color, tex_coords: Vector2::new(0.0, 0.0) },
+			Vertex { position: Vector3::new(-3.0, 0.0, 0.5), color, tex_coords: Vector2::new(1.0, 0.0) },
+			Vertex { position: Vector3::new(-3.0, 1.0, 0.5), color, tex_coords: Vector2::new(1.0, 1.0) },
+			Vertex { position: Vector3::new(-3.0, 1.0, -0.5), color, tex_coords: Vector2::new(0.0, 1.0) },
+			// Right face
+			Vertex { position: Vector3::new(3.0, 0.0, 0.5), color, tex_coords: Vector2::new(0.0, 0.0) },
+			Vertex { position: Vector3::new(3.0, 0.0, -0.5), color, tex_coords: Vector2::new(1.0, 0.0) },
+			Vertex { position: Vector3::new(3.0, 1.0, -0.5), color, tex_coords: Vector2::new(1.0, 1.0) },
+			Vertex { position: Vector3::new(3.0, 1.0, 0.5), color, tex_coords: Vector2::new(0.0, 1.0) },
+			// Top face
+			Vertex { position: Vector3::new(-3.0, 1.0, 0.5), color, tex_coords: Vector2::new(0.0, 0.0) },
+			Vertex { position: Vector3::new(3.0, 1.0, 0.5), color, tex_coords: Vector2::new(6.0, 0.0) },
+			Vertex { position: Vector3::new(3.0, 1.0, -0.5), color, tex_coords: Vector2::new(6.0, 1.0) },
+			Vertex { position: Vector3::new(-3.0, 1.0, -0.5), color, tex_coords: Vector2::new(0.0, 1.0) },
+			// Bottom face
+			Vertex { position: Vector3::new(-3.0, 0.0, -0.5), color, tex_coords: Vector2::new(0.0, 0.0) },
+			Vertex { position: Vector3::new(3.0, 0.0, -0.5), color, tex_coords: Vector2::new(6.0, 0.0) },
+			Vertex { position: Vector3::new(3.0, 0.0, 0.5), color, tex_coords: Vector2::new(6.0, 1.0) },
+			Vertex { position: Vector3::new(-3.0, 0.0, 0.5), color, tex_coords: Vector2::new(0.0, 1.0) }
+		];
+		let indices = vec![
+			0, 1, 2, 2, 3, 0,
+			4, 5, 6, 6, 7, 4,
+			8, 9, 10, 10, 11, 8,
+			12, 13, 14, 14, 15, 12,
+			16, 17, 18, 18, 19, 16,
+			20, 21, 22, 22, 23, 20
+		];
+		Mesh::new(&vertices, &indices)
+	}
+	
+
+	pub fn wall() -> Self {
+		let vertices = vec![
+			Vertex { position: Vector3::new(0.0, 0.0, -20.0), color: Vector3::zeros(), tex_coords: Vector2::new(0.0, 0.0) },
+			Vertex { position: Vector3::new(0.0, 5.0, -20.0), color: Vector3::zeros(), tex_coords: Vector2::new(0.0, 1.0) },
+			Vertex { position: Vector3::new(0.0, 5.0, 20.0), color: Vector3::zeros(), tex_coords: Vector2::new(4.0, 1.0) },
+			Vertex { position: Vector3::new(0.0, 0.0, 20.0), color: Vector3::zeros(), tex_coords: Vector2::new(4.0, 0.0) },
+		];
+		let indices = vec![0, 1, 2, 2, 3, 0];
 		Mesh::new(&vertices, &indices)
 	}
 

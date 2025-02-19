@@ -12,6 +12,8 @@ mod pause;
 mod game_over;
 
 use glfw::{Action, Context, WindowEvent, MouseButton};
+use std::collections::HashMap;
+
 use crate::mesh::Mesh;
 use crate::controls::handle_keys;
 use crate::level::LevelGenerator;
@@ -19,6 +21,7 @@ use crate::game::{new_game, play};
 use crate::menu::{Menu, MenuAction};
 use crate::pause::{Pause, PauseAction};
 use crate::game_over::{GameOver, GameOverAction};
+use crate::texture::Texture;
 
 enum GameState {
     Menu,
@@ -44,11 +47,12 @@ struct WorldState {
     total_pause_time: f64,
 	high_score: i32,
 	record: bool,
+	textures: HashMap<String, Texture>,
 }
 
 fn main() {
-	const SCREEN_WIDTH: f32 = 800.0;
-	const SCREEN_HEIGHT: f32 = 600.0;
+	const SCREEN_WIDTH: f32 = 1024.0;
+	const SCREEN_HEIGHT: f32 = 768.0;
     let mut glfw = glfw::init(glfw::fail_on_errors).unwrap();
     let (mut window, events) = glfw.create_window(SCREEN_WIDTH as u32, SCREEN_HEIGHT as u32, "42run", glfw::WindowMode::Windowed)
         .expect("Failed to create GLFW window");
@@ -70,6 +74,16 @@ fn main() {
 	let ui_shader = shader::Shader::new("shaders/vertex/ui.glsl", "shaders/fragment/ui.glsl").expect("Failed to load UI shaders");
 	let text_shader = shader::Shader::new("shaders/vertex/text.glsl", "shaders/fragment/text.glsl").expect("Failed to load text shaders");
 
+	let mut textures = HashMap::new();
+	textures.insert("character".into(), Texture::new("assets/textures/character.png"));
+	textures.insert("floor".into(), Texture::new("assets/textures/cave/floor.png"));
+	textures.insert("wall".into(), Texture::new("assets/textures/cave/wall2.png"));
+	textures.insert("ceiling".into(), Texture::new("assets/textures/cave/ceiling.png"));
+	textures.insert("obstacle".into(), Texture::new("assets/textures/obstacle.png"));
+	textures.insert("wideObstacle".into(), Texture::new("assets/textures/floor.png"));
+	textures.insert("tallPillar".into(), Texture::new("assets/textures/wall.png"));
+	textures.insert("lowBar".into(), Texture::new("assets/textures/ceiling.png"));
+
     let character_mesh = Mesh::cube(Mesh::PLAYER_COLOR);
 	let mut game_state = GameState::Menu;
     let mut character = character::Character::new();
@@ -90,6 +104,7 @@ fn main() {
 		total_pause_time: 0.0,
 		high_score: 0,
 		record: false,
+		textures,
     };
 
     while !window.should_close() {
