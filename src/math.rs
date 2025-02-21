@@ -9,31 +9,12 @@ pub fn translation(x: f32, y: f32, z: f32) -> Matrix4<f32> {
     )
 }
 
-pub fn identity() -> Matrix4<f32> {
-    Matrix4::new(
-        1.0, 0.0, 0.0, 0.0,
-        0.0, 1.0, 0.0, 0.0,
-        0.0, 0.0, 1.0, 0.0,
-        0.0, 0.0, 0.0, 1.0
-    )
-}
-
 pub fn scaling(sx: f32, sy: f32, sz: f32) -> Matrix4<f32> {
     Matrix4::new(
         sx,  0.0, 0.0, 0.0,
         0.0, sy,  0.0, 0.0,
         0.0, 0.0, sz,  0.0,
         0.0, 0.0, 0.0, 1.0
-    )
-}
-
-pub fn rotation_y(angle: f32) -> Matrix4<f32> {
-    let (sin, cos) = angle.sin_cos();
-    Matrix4::new(
-        cos,  0.0, -sin, 0.0,
-        0.0,  1.0, 0.0,  0.0,
-        sin,  0.0, cos,  0.0,
-        0.0,  0.0, 0.0,  1.0
     )
 }
 

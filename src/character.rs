@@ -1,6 +1,10 @@
 use nalgebra::{Vector3, Point3};
 use crate::LevelGenerator;
-use crate::collision::AABB;
+
+pub struct AABB {
+    pub min: Point3<f32>,
+    pub max: Point3<f32>,
+}
 
 pub struct Character {
     pub position: Point3<f32>,
@@ -9,7 +13,6 @@ pub struct Character {
 	is_pressing_down: bool,
     lane: i8,
 	target_x: f32,
-	is_squatting: bool,
     target_height: f32,
     pub current_height: f32,
     normal_height: f32,
@@ -34,7 +37,6 @@ impl Character {
 			is_pressing_down: false,
             lane: 0,
 			target_x: 0.0,
-			is_squatting: false,
 			target_height: 1.0,
 			current_height: 1.0,
 			normal_height: 1.0,
@@ -129,5 +131,16 @@ impl Character {
             self.lane += 1;
             self.target_x = self.lane as f32 * LevelGenerator::LANE_WIDTH;
         }
+    }
+}
+
+impl AABB {
+    pub fn collides(&self, other: &AABB) -> bool {
+        self.min.x <= other.max.x &&
+        self.max.x >= other.min.x &&
+        self.min.y <= other.max.y &&
+        self.max.y >= other.min.y &&
+        self.min.z <= other.max.z &&
+        self.max.z >= other.min.z
     }
 }

@@ -96,10 +96,10 @@ pub fn play(world: &mut WorldState, character: &mut Character, game_state: &mut 
                 );
                 game_shader.set_mat4("model", &model);
 				match obstacle.obstacle_type {
-					ObstacleType::Cube => world.textures["obstacle"].bind(0),
-					ObstacleType::WideRectangle => world.textures["wideObstacle"].bind(0),
-					ObstacleType::TallPillar => world.textures["tallPillar"].bind(0),
+					ObstacleType::Cube => world.textures["cube"].bind(0),
 					ObstacleType::LowBar => world.textures["lowBar"].bind(0),
+					ObstacleType::TallWall => world.textures["tallWall"].bind(0),
+					ObstacleType::HighBar => world.textures["highBar"].bind(0),
 				}
                 obstacle.mesh.draw();
             }
@@ -112,7 +112,7 @@ pub fn play(world: &mut WorldState, character: &mut Character, game_state: &mut 
             0.0
         ) * math::scaling(1.0, character.current_height, 1.0);
         game_shader.set_mat4("model", &model);
-		world.textures["character"].bind(0);
+		world.textures["skin"].bind(0);
         character_mesh.draw();
 
 		// Distance rendering
@@ -122,7 +122,7 @@ pub fn play(world: &mut WorldState, character: &mut Character, game_state: &mut 
 
         let distance_text = format!("{}m", world.z as i32 / 10);
         let text_mesh = Mesh::text(&distance_text);
-		let font = Texture::new("assets/fonts/PlayfulTime.png");
+		let font = Texture::new("assets/fonts/MinecraftRegular.png");
         
         text_shader.use_program();
         let ui_projection = math::orthographic(0.0, world.screen_width, 0.0, world.screen_height, -1.0, 1.0);

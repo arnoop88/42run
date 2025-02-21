@@ -3,13 +3,14 @@ mod mesh;
 mod character;
 mod level;
 mod math;
-mod collision;
 mod menu;
 mod controls;
 mod game;
 mod texture;
 mod pause;
 mod game_over;
+mod map_select;
+mod skin_select;
 
 use glfw::{Action, Context, WindowEvent, MouseButton};
 use std::collections::HashMap;
@@ -18,13 +19,19 @@ use crate::mesh::Mesh;
 use crate::controls::handle_keys;
 use crate::level::LevelGenerator;
 use crate::game::{new_game, play};
-use crate::menu::{Menu, MenuAction};
+use crate::menu::{Menu, MenuAction, render_message};
 use crate::pause::{Pause, PauseAction};
 use crate::game_over::{GameOver, GameOverAction};
+use crate::map_select::{MapSelect, MapAction};
+use crate::skin_select::{SkinSelect, SkinAction};
 use crate::texture::Texture;
 
+#[derive(Clone)]
 enum GameState {
     Menu,
+	MapSelect,
+    SkinSelect,
+	ShowMessage(String),
     Playing,
 	GameOver,
 	Paused,
@@ -45,9 +52,14 @@ struct WorldState {
 	level: LevelGenerator,
 	pause_start_time: f64,
     total_pause_time: f64,
-	high_score: i32,
 	record: bool,
+	current_skin: String,
+	current_map: String,
 	textures: HashMap<String, Texture>,
+	unlocked_maps: HashMap<String, bool>,
+    unlocked_skins: HashMap<String, bool>,
+    quest_progress: HashMap<String, i32>,
+	//current_message: Option<String>,
 }
 
 fn main() {
@@ -75,19 +87,20 @@ fn main() {
 	let text_shader = shader::Shader::new("shaders/vertex/text.glsl", "shaders/fragment/text.glsl").expect("Failed to load text shaders");
 
 	let mut textures = HashMap::new();
-	textures.insert("character".into(), Texture::new("assets/textures/character.png"));
-	textures.insert("floor".into(), Texture::new("assets/textures/cave/floor.png"));
-	textures.insert("wall".into(), Texture::new("assets/textures/cave/wall2.png"));
-	textures.insert("ceiling".into(), Texture::new("assets/textures/cave/ceiling.png"));
-	textures.insert("obstacle".into(), Texture::new("assets/textures/obstacle.png"));
-	textures.insert("wideObstacle".into(), Texture::new("assets/textures/floor.png"));
-	textures.insert("tallPillar".into(), Texture::new("assets/textures/wall.png"));
-	textures.insert("lowBar".into(), Texture::new("assets/textures/ceiling.png"));
+	textures.insert("skin".into(), Texture::new("assets/textures/skins/red.png"));
+	textures.insert("floor".into(), Texture::new("assets/textures/maps/cave/floor.png"));
+	textures.insert("wall".into(), Texture::new("assets/textures/maps/cave/wall.png"));
+	textures.insert("ceiling".into(), Texture::new("assets/textures/maps/cave/ceiling.png"));
+	textures.insert("cube".into(), Texture::new("assets/textures/maps/cave/cube.png"));
+	textures.insert("lowBar".into(), Texture::new("assets/textures/maps/cave/lowBar.png"));
+	textures.insert("tallWall".into(), Texture::new("assets/textures/maps/cave/tallWall.png"));
+	textures.insert("highBar".into(), Texture::new("assets/textures/maps/cave/highBar.png"));
 
     let character_mesh = Mesh::cube(Mesh::PLAYER_COLOR);
 	let mut game_state = GameState::Menu;
+	let mut previous_state= GameState::Menu;
     let mut character = character::Character::new();
-    let mut world = WorldState {
+	let mut world = WorldState {
 		speed: 20.0,
 		z: 0.0,
 		last_frame_time: glfw.get_time(),
@@ -102,10 +115,33 @@ fn main() {
 		level: level::LevelGenerator::new(),
 		pause_start_time: 0.0,
 		total_pause_time: 0.0,
-		high_score: 0,
 		record: false,
+		current_skin: "red".into(),
+		current_map: "cave".into(),
 		textures,
+		unlocked_maps: HashMap::from([
+			("cave".into(), true),
+			("temple".into(), false),
+		]),
+		unlocked_skins: HashMap::from([
+			("red".into(), true),
+			("trollFace".into(), false),
+			("dirt".into(), false),
+			("chiseledStone".into(), false),
+			("diamondBlock".into(), false),
+			("emeraldBlock".into(), false),
+			("arcane".into(), false),
+		]),
+		quest_progress: HashMap::from([
+			("highScore".into(), 0),
+			("caveScore".into(), 0),
+			("templeScore".into(), 0),
+			("deaths".into(), 0),
+		]),
+		//current_message: None,
     };
+	let map_select = MapSelect::new(SCREEN_WIDTH, SCREEN_HEIGHT, &world);
+    let skin_select = SkinSelect::new(SCREEN_WIDTH, SCREEN_HEIGHT, &world);
 
     while !window.should_close() {
         for (_, event) in glfw::flush_messages(&events) {
@@ -125,36 +161,79 @@ fn main() {
 						world.mouse_clicked = true;
 					}
 				},
-				_ => handle_keys(&mut window, event, &mut game_state, &mut character, &mut world, &glfw),
+				_ => handle_keys(&mut window, event, &mut game_state, &mut character, &mut world, &glfw, &previous_state),
 			}
         }
 
 		match game_state {
 			GameState::Menu => {
-				unsafe {
-					world.menu.render(&ui_shader, &text_shader);
-				}
+				unsafe { world.menu.render(&ui_shader, &text_shader); }
 				if world.mouse_clicked {
 					match world.menu.handle_click(world.mouse_x, world.mouse_y) {
 						MenuAction::Play => new_game(&mut game_state, &mut character, &mut world, &glfw),
+						MenuAction::MapSelect => game_state = GameState::MapSelect,
+						MenuAction::SkinSelect => game_state = GameState::SkinSelect,
 						MenuAction::Quit => window.set_should_close(true),
 						MenuAction::None => {}
 					}
 					world.mouse_clicked = false;
 				}
 			},
+			GameState::MapSelect => {
+				unsafe { map_select.render(&ui_shader, &text_shader, &world.current_map); }
+				if world.mouse_clicked {
+					match map_select.handle_click(world.mouse_x, world.mouse_y) {
+						MapAction::SelectMap(map) => {
+							world.current_map = map;
+							world.change_map();
+						}
+						MapAction::ShowMessage(msg) => {
+							previous_state = GameState::MapSelect;
+							game_state = GameState::ShowMessage(msg);
+						}
+						MapAction::Back => game_state = GameState::Menu,
+						_ => {}
+					}
+					world.mouse_clicked = false;
+				}
+			}
+			GameState::SkinSelect => {
+				unsafe { skin_select.render(&ui_shader, &text_shader, &world.current_skin); }
+				if world.mouse_clicked {
+					match skin_select.handle_click(world.mouse_x, world.mouse_y) {
+						SkinAction::SelectSkin(skin) => {
+							world.current_skin = skin;
+							world.change_skin();
+						}
+						SkinAction::ShowMessage(msg) => {
+							previous_state = GameState::SkinSelect;
+							game_state = GameState::ShowMessage(msg);
+						}
+						SkinAction::Back => game_state = GameState::Menu,
+						_ => {}
+					}
+					world.mouse_clicked = false;
+				}
+			}
+			GameState::ShowMessage(ref msg) => {
+				unsafe {
+					render_message(&msg, &ui_shader, &text_shader, world.screen_width, world.screen_height);
+					if world.mouse_clicked {
+						game_state = previous_state.clone();
+						world.mouse_clicked = false;
+					}
+				}
+			}
 			GameState::Playing => {
-				let current_time = glfw.get_time();
-				let adjusted_time = current_time - world.total_pause_time;
-				let delta_time = (adjusted_time - world.last_frame_time) as f32;
+				let current_time: f64 = glfw.get_time();
+				let adjusted_time: f64 = current_time - world.total_pause_time;
+				let delta_time: f32 = (adjusted_time - world.last_frame_time) as f32;
 				world.last_frame_time = adjusted_time;
 				character.update(delta_time);
 				play(&mut world, &mut character, &mut game_state, &game_shader, &character_mesh, &text_shader, delta_time);
 			}
 			GameState::Paused => {
-				unsafe {
-					world.pause.render(&ui_shader, &text_shader);
-				}
+				unsafe { world.pause.render(&ui_shader, &text_shader); }
 				if world.mouse_clicked {
 					match world.pause.handle_click(world.mouse_x, world.mouse_y) {
 						PauseAction::Resume => {
@@ -168,12 +247,12 @@ fn main() {
 				}
 			}
 			GameState::GameOver => {
-				if world.z as i32 / 10 > world.high_score {
-					world.high_score = world.z as i32 / 10;
+				if world.z as i32 / 10 > *world.quest_progress.get("highScore").unwrap_or(&0) {
+					world.quest_progress.insert("highScore".into(), world.z as i32 / 10);
 					world.record = true;
 				}
 				unsafe {
-					world.game_over.render(&ui_shader, &text_shader, world.high_score, world.record);
+					world.game_over.render(&ui_shader, &text_shader, *world.quest_progress.get("highScore").unwrap_or(&0), world.record);
 				}
 				if world.mouse_clicked {
 					match world.game_over.handle_click(world.mouse_x, world.mouse_y) {
@@ -188,4 +267,24 @@ fn main() {
         window.swap_buffers();
         glfw.poll_events();
     }
+}
+
+impl WorldState {
+	fn change_map(&mut self) {
+		let map_path = format!("assets/textures/maps/{}", self.current_map);
+		
+		self.textures.insert("floor".into(), Texture::new(&format!("{}/floor.png", map_path)));
+		self.textures.insert("wall".into(), Texture::new(&format!("{}/wall.png", map_path)));
+		self.textures.insert("ceiling".into(), Texture::new(&format!("{}/ceiling.png", map_path)));
+		self.textures.insert("cube".into(), Texture::new(&format!("{}/cube.png", map_path)));
+		self.textures.insert("lowBar".into(), Texture::new(&format!("{}/lowBar.png", map_path)));
+		self.textures.insert("tallWall".into(), Texture::new(&format!("{}/tallWall.png", map_path)));
+		self.textures.insert("highBar".into(), Texture::new(&format!("{}/highBar.png", map_path)));
+	}
+
+	fn change_skin(&mut self) {
+		let skin_path = format!("assets/textures/skins/{}", self.current_skin);
+
+		self.textures.insert("skin".into(), Texture::new(&format!("{}.png", skin_path)));
+	}
 }

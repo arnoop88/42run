@@ -5,7 +5,7 @@ use crate::character::Character;
 use crate::WorldState;
 use crate::new_game;
 
-pub fn handle_keys(window: &mut glfw::Window, event: WindowEvent, game_state: &mut GameState, character: &mut Character, world: &mut WorldState, glfw: &glfw::Glfw) {
+pub fn handle_keys(window: &mut glfw::Window, event: WindowEvent, game_state: &mut GameState, character: &mut Character, world: &mut WorldState, glfw: &glfw::Glfw, previous_state: &GameState) {
     match event {
         glfw::WindowEvent::Key(key, _, action, _) => {
             match game_state {
@@ -32,6 +32,14 @@ pub fn handle_keys(window: &mut glfw::Window, event: WindowEvent, game_state: &m
 					Key::Enter if action == Action::Press => new_game(game_state, character, world, glfw),
                     _ => {}
                 },
+				GameState::MapSelect | GameState::SkinSelect => match key {
+					Key::Escape if action == Action::Press => *game_state = GameState::Menu,
+                    _ => {}
+                },
+				GameState::ShowMessage(..) => match key {
+					Key::Escape if action == Action::Press => *game_state = previous_state.clone(),
+					_ => {}
+				}
                 GameState::Paused => match key {
 					Key::Escape | Key::Q if action == Action::Press => *game_state = GameState::Menu,
                     Key::Enter | Key::R if action == Action::Press => {

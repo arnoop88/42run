@@ -19,7 +19,6 @@ pub struct Mesh {
 impl Mesh {
 	pub const PLAYER_COLOR: Vector3<f32> = Vector3::new(1.0, 0.0, 0.0); // Red
     pub const OBSTACLE_COLOR: Vector3<f32> = Vector3::new(1.0, 1.0, 0.0); // Yellow
-    const ROAD_COLOR: Vector3<f32> = Vector3::new(0.3, 0.3, 0.3); // Dark gray
 
     pub fn new(vertices: &[Vertex], indices: &[u32]) -> Self {
         let mut vao = 0;
@@ -329,15 +328,19 @@ impl Mesh {
 		let char_height = 1.0 / 16.0;
 		let scale = 1.0;
 		let mut x_offset = 0.0;
+		let mut quad_count = 0;
 	
-		for (i, c) in text.chars().enumerate() {
+		for c in text.chars() {
+			if c == ' ' {
+				x_offset += scale * 0.8 * 0.6;
+				continue;
+			}
+	
 			let ascii = c as u32;
-			// Shift index so that the atlas cell 0 corresponds to ASCII 32.
 			let index = ascii.checked_sub(32).unwrap_or(0);
 			let grid_x = (index % 16) as f32;
 			let grid_y = (index / 16) as f32;
-			// Because texture.rs flips the image vertically, we need to flip the grid Y:
-			let grid_y_effective = 15.0 - grid_y;  // For a 16x16 grid (indices 0..15)
+			let grid_y_effective = 15.0 - grid_y;
 	
 			let u = grid_x * char_width;
 			let v = grid_y_effective * char_height;
@@ -345,35 +348,21 @@ impl Mesh {
 			let v_top = v + char_height;
 	
 			vertices.extend_from_slice(&[
-				Vertex {
-					position: Vector3::new(x_offset, 0.0, 0.0),
-					color: Vector3::zeros(),
-					tex_coords: Vector2::new(u, v),
-				},
-				Vertex {
-					position: Vector3::new(x_offset + scale, 0.0, 0.0),
-					color: Vector3::zeros(),
-					tex_coords: Vector2::new(u_right, v),
-				},
-				Vertex {
-					position: Vector3::new(x_offset + scale, scale, 0.0),
-					color: Vector3::zeros(),
-					tex_coords: Vector2::new(u_right, v_top),
-				},
-				Vertex {
-					position: Vector3::new(x_offset, scale, 0.0),
-					color: Vector3::zeros(),
-					tex_coords: Vector2::new(u, v_top),
-				},
+				Vertex { position: Vector3::new(x_offset, 0.0, 0.0), color: Vector3::zeros(), tex_coords: Vector2::new(u, v) },
+				Vertex { position: Vector3::new(x_offset + scale, 0.0, 0.0), color: Vector3::zeros(), tex_coords: Vector2::new(u_right, v) },
+				Vertex { position: Vector3::new(x_offset + scale, scale, 0.0), color: Vector3::zeros(), tex_coords: Vector2::new(u_right, v_top) },
+				Vertex { position: Vector3::new(x_offset, scale, 0.0), color: Vector3::zeros(), tex_coords: Vector2::new(u, v_top) },
 			]);
 	
-			let base = (i * 4) as u32;
+			let base = (quad_count * 4) as u32;
 			indices.extend_from_slice(&[base, base + 1, base + 2, base + 2, base + 3, base]);
+			quad_count += 1;
 			x_offset += scale * 0.8;
 		}
 	
 		Mesh::new(&vertices, &indices)
 	}
+	
 }
 
 impl Drop for Mesh {

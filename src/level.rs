@@ -1,15 +1,14 @@
 use nalgebra::{Point3, Vector3};
 use rand::Rng;
-use crate::mesh::{Mesh};
-use crate::character::Character;
-use crate::collision::AABB;
+use crate::mesh::Mesh;
+use crate::character::AABB;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum ObstacleType {
     Cube,
-    WideRectangle,
-	TallPillar,
-	LowBar,
+    LowBar,
+	TallWall,
+	HighBar,
 }
 
 pub struct LevelSegment {
@@ -28,8 +27,6 @@ pub struct Obstacle {
 pub struct LevelGenerator {
     segments: Vec<LevelSegment>,
     next_z: f32,
-    segment_length: f32,
-	obstacle_template: Mesh,
 }
 
 impl LevelGenerator {
@@ -39,12 +36,9 @@ impl LevelGenerator {
 	pub const LANE_WIDTH: f32 = 2.0;
 
     pub fn new() -> Self {
-		let obstacle_template = Mesh::cube(Mesh::OBSTACLE_COLOR);
         let mut generator = Self {
             segments: Vec::new(),
             next_z: 0.0,
-            segment_length: 20.0,
-			obstacle_template,
         };
         
         // Generate initial segments
@@ -79,9 +73,9 @@ impl LevelGenerator {
 
         let obstacle_type = match rng.gen_range(0..=3) {
 			0 => ObstacleType::Cube,
-			1 => ObstacleType::WideRectangle,
-			2 => ObstacleType::TallPillar,
-            _ => ObstacleType::LowBar,
+			1 => ObstacleType::LowBar,
+			2 => ObstacleType::TallWall,
+            _ => ObstacleType::HighBar,
 		};
 		
 		match obstacle_type {
@@ -97,27 +91,27 @@ impl LevelGenerator {
 					});
 				}
 			}
-			ObstacleType::WideRectangle => {
+			ObstacleType::LowBar => {
 				obstacles.push(Obstacle {
 					mesh: Mesh::wide_rectangle(),
 					position: Point3::new(0.0, 0.001, z_pos + Self::OBSTACLE_OFFSET),
-					obstacle_type: ObstacleType::WideRectangle,
+					obstacle_type: ObstacleType::LowBar,
 				});
 			}
-			ObstacleType::TallPillar => {
+			ObstacleType::TallWall => {
 				let is_left = rng.gen_bool(0.5);
 				let x_position = if is_left { -1.0 } else { 1.0 };
 				obstacles.push(Obstacle {
 					mesh: Mesh::tall_pillar(),
 					position: Point3::new(x_position, 0.001, z_pos + Self::OBSTACLE_OFFSET),
-					obstacle_type: ObstacleType::TallPillar,
+					obstacle_type: ObstacleType::TallWall,
 				});
 			}
-			ObstacleType::LowBar => {
+			ObstacleType::HighBar => {
                 obstacles.push(Obstacle {
                     mesh: Mesh::low_bar(),
                     position: Point3::new(0.0, 0.8, z_pos + Self::OBSTACLE_OFFSET),
-                    obstacle_type: ObstacleType::LowBar,
+                    obstacle_type: ObstacleType::HighBar,
                 });
             }
 		}
@@ -144,9 +138,9 @@ impl Obstacle {
     pub fn get_aabb(&self) -> AABB {
         let size = match self.obstacle_type {
             ObstacleType::Cube => Vector3::new(1.0, 1.0, 1.0),
-            ObstacleType::WideRectangle => Vector3::new(6.0, 1.0, 1.0),
-			ObstacleType::TallPillar => Vector3::new(4.0, 2.0, 1.0),
-			ObstacleType::LowBar => Vector3::new(6.0, 1.2, 1.0),
+            ObstacleType::LowBar => Vector3::new(6.0, 1.0, 1.0),
+			ObstacleType::TallWall => Vector3::new(4.0, 2.0, 1.0),
+			ObstacleType::HighBar => Vector3::new(6.0, 1.2, 1.0),
         };
 
         AABB {

@@ -4,7 +4,6 @@ use crate::math::{translation, scaling, orthographic};
 use crate::shader::Shader;
 use crate::mesh::Mesh;
 use crate::texture::Texture;
-use crate::WorldState;
 
 pub enum GameOverAction {
 	NewGame,
@@ -22,18 +21,24 @@ pub struct GameOver {
 impl GameOver {
 	pub fn new(screen_width: f32, screen_height: f32) -> Self {
 		let resume_button = Button {
+			id: "".into(),
+			unlocked: true,
+			unlock_requirement: "".into(),
 			mesh: Mesh::quad_2d(),
 			text_mesh: Mesh::text("RETRY"),
 			position: (screen_width / 2.0 - 150.0, screen_height / 2.0),
 			size: (300.0, 80.0),
-			color: Vector3::new(0.2, 1.0, 0.3), // green
+			color: Vector3::new(0.3, 0.8, 0.3),
 		};
 		let quit_button = Button {
+			id: "".into(),
+			unlocked: true,
+			unlock_requirement: "".into(),
 			mesh: Mesh::quad_2d(),
 			text_mesh: Mesh::text("QUIT"),
 			position: (screen_width / 2.0 - 150.0, screen_height / 2.0 - 130.0),
 			size: (300.0, 80.0),
-			color: Vector3::new(1.0, 0.2, 0.2), // red
+			color: Vector3::new(0.9, 0.2, 0.2),
 		};
 	
 		let buttons = vec![resume_button, quit_button];
@@ -108,7 +113,7 @@ impl GameOver {
 			text_shader.use_program();
 			text_shader.set_mat4("projection", &self.ui_projection);
 			text_shader.set_vec3("textColor", &Vector3::new(0.1, 0.0, 0.0));
-			let font = Texture::new("assets/fonts/ChrustyRock.png");
+			let font = Texture::new("assets/fonts/MinecraftRegular.png");
 			font.bind(0);
 			let text_scale = 50.0;
 			let text_width = button.text_mesh.indices_count as f32 / 6.0 * text_scale * 0.8;
