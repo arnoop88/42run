@@ -1,4 +1,4 @@
-use nalgebra::{Matrix4, Vector3, Vector4};
+use nalgebra::{Matrix4, Vector3};
 use crate::math::{scaling, translation, orthographic};
 use crate::mesh::Mesh;
 use crate::shader::Shader;

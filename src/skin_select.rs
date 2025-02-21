@@ -34,7 +34,7 @@ impl SkinSelect {
             },
             Button {
 				id: "trollFace".into(),
-				unlocked: *world.unlocked_maps.get("trollFace").unwrap_or(&false),
+				unlocked: *world.unlocked_skins.get("trollFace").unwrap_or(&false),
 				unlock_requirement: "Die 100 times".into(),
                 mesh: Mesh::quad_2d(),
                 text_mesh: Mesh::text("TROLL"),
@@ -44,7 +44,7 @@ impl SkinSelect {
             },
 			Button {
 				id: "dirt".into(),
-				unlocked: *world.unlocked_maps.get("dirt").unwrap_or(&false),
+				unlocked: *world.unlocked_skins.get("dirt").unwrap_or(&false),
 				unlock_requirement: "Reach 300m in cave".into(),
                 mesh: Mesh::quad_2d(),
                 text_mesh: Mesh::text("DIRT"),
@@ -54,7 +54,7 @@ impl SkinSelect {
             },
 			Button {
 				id: "chiseledStone".into(),
-				unlocked: *world.unlocked_maps.get("chiseledStone").unwrap_or(&false),
+				unlocked: *world.unlocked_skins.get("chiseledStone").unwrap_or(&false),
 				unlock_requirement: "Reach 300m in temple".into(),
                 mesh: Mesh::quad_2d(),
                 text_mesh: Mesh::text("STONE"),
@@ -64,7 +64,7 @@ impl SkinSelect {
             },
 			Button {
 				id: "diamondBlock".into(),
-				unlocked: *world.unlocked_maps.get("diamondBlock").unwrap_or(&false),
+				unlocked: *world.unlocked_skins.get("diamondBlock").unwrap_or(&false),
 				unlock_requirement: "Reach 500m in cave".into(),
                 mesh: Mesh::quad_2d(),
                 text_mesh: Mesh::text("DIAMOND"),
@@ -74,7 +74,7 @@ impl SkinSelect {
             },
             Button {
 				id: "emeraldBlock".into(),
-				unlocked: *world.unlocked_maps.get("emeraldBlock").unwrap_or(&false),
+				unlocked: *world.unlocked_skins.get("emeraldBlock").unwrap_or(&false),
 				unlock_requirement: "Reach 500m in temple".into(),
                 mesh: Mesh::quad_2d(),
                 text_mesh: Mesh::text("EMERALD"),
@@ -84,7 +84,7 @@ impl SkinSelect {
             },
 			Button {
 				id: "arcane".into(),
-				unlocked: *world.unlocked_maps.get("arcane").unwrap_or(&false),
+				unlocked: *world.unlocked_skins.get("arcane").unwrap_or(&false),
 				unlock_requirement: "Reach 1000m in any map".into(),
                 mesh: Mesh::quad_2d(),
                 text_mesh: Mesh::text("ARCANE"),
