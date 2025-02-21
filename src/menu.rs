@@ -13,9 +13,6 @@ pub enum MenuAction {
 }
 
 pub struct Button {
-	pub id: String,
-	pub unlocked: bool,
-    pub unlock_requirement: String,
     pub mesh: Mesh,
     pub text_mesh: Mesh,
     pub position: (f32, f32),
@@ -34,9 +31,6 @@ impl Menu {
     pub fn new(screen_width: f32, screen_height: f32) -> Self {
         let buttons = vec![
             Button {
-				id: "".into(),
-				unlocked: true,
-				unlock_requirement: "".into(),
                 mesh: Mesh::quad_2d(),
                 text_mesh: Mesh::text("PLAY"),
                 position: (screen_width / 2.0 - 150.0, screen_height / 2.0 + 50.0),
@@ -44,19 +38,13 @@ impl Menu {
                 color: Vector3::new(0.3, 0.8, 0.3),
             },
             Button {
-				id: "".into(),
-				unlocked: true,
-				unlock_requirement: "".into(),
                 mesh: Mesh::quad_2d(),
                 text_mesh: Mesh::text("MAPS"),
                 position: (screen_width / 2.0 - 150.0, screen_height / 2.0 - 50.0),
                 size: (300.0, 80.0),
-                color: Vector3::new(0.4, 0.6, 0.9),
+                color: Vector3::new(0.4, 0.6, 1.0),
             },
             Button {
-				id: "".into(),
-				unlocked: true,
-				unlock_requirement: "".into(),
                 mesh: Mesh::quad_2d(),
                 text_mesh: Mesh::text("SKINS"),
                 position: (screen_width / 2.0 - 150.0, screen_height / 2.0 - 150.0),
@@ -64,9 +52,6 @@ impl Menu {
                 color: Vector3::new(0.9, 0.6, 0.0),
             },
             Button {
-				id: "".into(),
-				unlocked: true,
-				unlock_requirement: "".into(),
                 mesh: Mesh::quad_2d(),
                 text_mesh: Mesh::text("QUIT"),
                 position: (screen_width / 2.0 - 150.0, screen_height / 2.0 - 250.0),

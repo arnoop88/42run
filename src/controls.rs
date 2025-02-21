@@ -1,5 +1,4 @@
 use glfw::{Action, Key, WindowEvent};
-
 use crate::GameState;
 use crate::character::Character;
 use crate::WorldState;
@@ -36,7 +35,7 @@ pub fn handle_keys(window: &mut glfw::Window, event: WindowEvent, game_state: &m
 					Key::Escape if action == Action::Press => *game_state = GameState::Menu,
                     _ => {}
                 },
-				GameState::ShowMessage(..) => match key {
+				GameState::ShowMessage(_) => match key {
 					Key::Escape if action == Action::Press => *game_state = previous_state.clone(),
 					_ => {}
 				}

@@ -21,9 +21,6 @@ pub struct Pause {
 impl Pause {
 	pub fn new(screen_width: f32, screen_height: f32) -> Self {
 		let resume_button = Button {
-			id: "".into(),
-			unlocked: true,
-			unlock_requirement: "".into(),
 			mesh: Mesh::quad_2d(),
 			text_mesh: Mesh::text("RESUME"),
 			position: (screen_width / 2.0 - 150.0, screen_height / 2.0),
@@ -31,9 +28,6 @@ impl Pause {
 			color: Vector3::new(0.4, 0.6, 1.0),
 		};
 		let quit_button = Button {
-			id: "".into(),
-			unlocked: true,
-			unlock_requirement: "".into(),
 			mesh: Mesh::quad_2d(),
 			text_mesh: Mesh::text("QUIT"),
 			position: (screen_width / 2.0 - 150.0, screen_height / 2.0 - 130.0),

@@ -9,12 +9,12 @@ mod game;
 mod texture;
 mod pause;
 mod game_over;
-mod map_select;
-mod skin_select;
+mod maps;
+mod skins;
+mod save_data;
 
 use glfw::{Action, Context, WindowEvent, MouseButton};
 use std::collections::HashMap;
-
 use crate::mesh::Mesh;
 use crate::controls::handle_keys;
 use crate::level::LevelGenerator;
@@ -22,9 +22,10 @@ use crate::game::{new_game, play};
 use crate::menu::{Menu, MenuAction, render_message};
 use crate::pause::{Pause, PauseAction};
 use crate::game_over::{GameOver, GameOverAction};
-use crate::map_select::{MapSelect, MapAction};
-use crate::skin_select::{SkinSelect, SkinAction};
+use crate::maps::{MapSelect, MapAction, Maps};
+use crate::skins::{SkinSelect, SkinAction, Skins};
 use crate::texture::Texture;
+use crate::save_data::{save_progress, load_progress, extract_save_data};
 
 #[derive(Clone)]
 enum GameState {
@@ -53,13 +54,39 @@ struct WorldState {
 	pause_start_time: f64,
     total_pause_time: f64,
 	record: bool,
-	current_skin: String,
-	current_map: String,
+	current_skin: Skins,
+	current_map: Maps,
 	textures: HashMap<String, Texture>,
 	unlocked_maps: HashMap<String, bool>,
     unlocked_skins: HashMap<String, bool>,
     quest_progress: HashMap<String, i32>,
-	//current_message: Option<String>,
+}
+
+impl WorldState {
+	fn change_map(&mut self) {
+		let map_path = match &self.current_map {
+            Maps::Cave(path) | Maps::Temple(path) => format!("assets/textures/maps/{}", path),
+            Maps::None => String::from("assets/textures/maps/cave.png"),
+        };
+		
+		self.textures.insert("floor".into(), Texture::new(&format!("{}/floor.png", map_path)));
+		self.textures.insert("wall".into(), Texture::new(&format!("{}/wall.png", map_path)));
+		self.textures.insert("ceiling".into(), Texture::new(&format!("{}/ceiling.png", map_path)));
+		self.textures.insert("cube".into(), Texture::new(&format!("{}/cube.png", map_path)));
+		self.textures.insert("lowBar".into(), Texture::new(&format!("{}/lowBar.png", map_path)));
+		self.textures.insert("tallWall".into(), Texture::new(&format!("{}/tallWall.png", map_path)));
+		self.textures.insert("highBar".into(), Texture::new(&format!("{}/highBar.png", map_path)));
+	}
+
+	fn change_skin(&mut self) {
+		let skin_path = match &self.current_skin {
+            Skins::Red(path) | Skins::Troll(path) | Skins::Dirt(path) | Skins::Stone(path) |
+            Skins::Diamond(path) | Skins::Emerald(path) | Skins::Arcane(path) => format!("assets/textures/skins/{}", path),
+            Skins::None => String::from("assets/textures/skins/red.png"),
+        };
+
+		self.textures.insert("skin".into(), Texture::new(&format!("{}.png", skin_path)));
+	}
 }
 
 fn main() {
@@ -116,8 +143,8 @@ fn main() {
 		pause_start_time: 0.0,
 		total_pause_time: 0.0,
 		record: false,
-		current_skin: "red".into(),
-		current_map: "cave".into(),
+		current_skin: Skins::Red("red".into()),
+		current_map: Maps::Cave("cave".into()),
 		textures,
 		unlocked_maps: HashMap::from([
 			("cave".into(), true),
@@ -125,11 +152,11 @@ fn main() {
 		]),
 		unlocked_skins: HashMap::from([
 			("red".into(), true),
-			("trollFace".into(), false),
+			("troll".into(), false),
 			("dirt".into(), false),
-			("chiseledStone".into(), false),
-			("diamondBlock".into(), false),
-			("emeraldBlock".into(), false),
+			("stone".into(), false),
+			("diamond".into(), false),
+			("emerald".into(), false),
 			("arcane".into(), false),
 		]),
 		quest_progress: HashMap::from([
@@ -137,11 +164,22 @@ fn main() {
 			("caveScore".into(), 0),
 			("templeScore".into(), 0),
 			("deaths".into(), 0),
+			("caveGames".into(), 0),
 		]),
-		//current_message: None,
     };
-	let map_select = MapSelect::new(SCREEN_WIDTH, SCREEN_HEIGHT, &world);
-    let skin_select = SkinSelect::new(SCREEN_WIDTH, SCREEN_HEIGHT, &world);
+	if let Ok(save_data) = load_progress() {
+        world.unlocked_maps = save_data.unlocked_maps;
+        world.unlocked_skins = save_data.unlocked_skins;
+        world.quest_progress = save_data.quest_progress;
+		if world.current_map != save_data.current_map {
+			world.current_map = save_data.current_map;
+			world.change_map();
+		}
+		if world.current_skin != save_data.current_skin {
+			world.current_skin = save_data.current_skin;
+			world.change_skin();
+		}
+    }
 
     while !window.should_close() {
         for (_, event) in glfw::flush_messages(&events) {
@@ -180,6 +218,7 @@ fn main() {
 				}
 			},
 			GameState::MapSelect => {
+				let map_select = MapSelect::new(SCREEN_WIDTH, SCREEN_HEIGHT, &world);
 				unsafe { map_select.render(&ui_shader, &text_shader, &world.current_map); }
 				if world.mouse_clicked {
 					match map_select.handle_click(world.mouse_x, world.mouse_y) {
@@ -198,6 +237,7 @@ fn main() {
 				}
 			}
 			GameState::SkinSelect => {
+				let skin_select = SkinSelect::new(SCREEN_WIDTH, SCREEN_HEIGHT, &world);
 				unsafe { skin_select.render(&ui_shader, &text_shader, &world.current_skin); }
 				if world.mouse_clicked {
 					match skin_select.handle_click(world.mouse_x, world.mouse_y) {
@@ -247,10 +287,6 @@ fn main() {
 				}
 			}
 			GameState::GameOver => {
-				if world.z as i32 / 10 > *world.quest_progress.get("highScore").unwrap_or(&0) {
-					world.quest_progress.insert("highScore".into(), world.z as i32 / 10);
-					world.record = true;
-				}
 				unsafe {
 					world.game_over.render(&ui_shader, &text_shader, *world.quest_progress.get("highScore").unwrap_or(&0), world.record);
 				}
@@ -267,24 +303,7 @@ fn main() {
         window.swap_buffers();
         glfw.poll_events();
     }
-}
-
-impl WorldState {
-	fn change_map(&mut self) {
-		let map_path = format!("assets/textures/maps/{}", self.current_map);
-		
-		self.textures.insert("floor".into(), Texture::new(&format!("{}/floor.png", map_path)));
-		self.textures.insert("wall".into(), Texture::new(&format!("{}/wall.png", map_path)));
-		self.textures.insert("ceiling".into(), Texture::new(&format!("{}/ceiling.png", map_path)));
-		self.textures.insert("cube".into(), Texture::new(&format!("{}/cube.png", map_path)));
-		self.textures.insert("lowBar".into(), Texture::new(&format!("{}/lowBar.png", map_path)));
-		self.textures.insert("tallWall".into(), Texture::new(&format!("{}/tallWall.png", map_path)));
-		self.textures.insert("highBar".into(), Texture::new(&format!("{}/highBar.png", map_path)));
-	}
-
-	fn change_skin(&mut self) {
-		let skin_path = format!("assets/textures/skins/{}", self.current_skin);
-
-		self.textures.insert("skin".into(), Texture::new(&format!("{}.png", skin_path)));
+	if let Err(e) = save_progress(&extract_save_data(&world)) {
+		eprintln!("Error saving game progress: {}", e);
 	}
 }

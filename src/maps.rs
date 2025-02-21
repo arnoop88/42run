@@ -1,19 +1,38 @@
 use nalgebra::{Matrix4, Vector3};
+use serde::{Serialize, Deserialize};
 use crate::math::{scaling, translation, orthographic};
-use crate::menu::Button;
 use crate::mesh::Mesh;
 use crate::shader::Shader;
 use crate::texture::Texture;
 use crate::WorldState;
 
+pub struct MapButton {
+	pub id: Maps,
+	pub unlocked: bool,
+    pub unlock_requirement: String,
+    pub mesh: Mesh,
+    pub text_mesh: Mesh,
+    pub position: (f32, f32),
+    pub size: (f32, f32),
+    pub color: Vector3<f32>,
+}
+
 pub enum MapAction {
-	SelectMap(String),
+	SelectMap(Maps),
 	ShowMessage(String),
 	Back,
 	None,
 }
+
+#[derive(Serialize, Deserialize, PartialEq, Clone)]
+pub enum Maps {
+	Cave(String),
+	Temple(String),
+	None,
+}
+
 pub struct MapSelect {
-    buttons: Vec<Button>,
+    buttons: Vec<MapButton>,
     ui_projection: Matrix4<f32>,
     screen_width: f32,
     screen_height: f32,
@@ -22,9 +41,9 @@ pub struct MapSelect {
 impl MapSelect {
     pub fn new(screen_width: f32, screen_height: f32, world: &WorldState) -> Self {
         let buttons = vec![
-            Button {
-				id: "cave".into(),
-				unlocked: *world.unlocked_maps.get("cave").unwrap_or(&false),
+            MapButton {
+				id: Maps::Cave("cave".into()),
+				unlocked: world.unlocked_maps["cave"],
 				unlock_requirement: "".into(),
                 mesh: Mesh::quad_2d(),
                 text_mesh: Mesh::text("CAVE"),
@@ -32,9 +51,9 @@ impl MapSelect {
                 size: (300.0, 80.0),
                 color: Vector3::new(0.4, 0.4, 0.4),
             },
-            Button {
-				id: "temple".into(),
-				unlocked: *world.unlocked_maps.get("temple").unwrap_or(&false),
+            MapButton {
+				id: Maps::Temple("temple".into()),
+				unlocked: world.unlocked_maps["temple"],
 				unlock_requirement: "Play 10 games in cave".into(),
                 mesh: Mesh::quad_2d(),
                 text_mesh: Mesh::text("TEMPLE"),
@@ -42,8 +61,8 @@ impl MapSelect {
                 size: (300.0, 80.0),
                 color: Vector3::new(0.4, 0.4, 0.4),
             },
-            Button {
-				id: "".into(),
+            MapButton {
+				id: Maps::None,
 				unlocked: true,
 				unlock_requirement: "".into(),
                 mesh: Mesh::quad_2d(),
@@ -62,7 +81,7 @@ impl MapSelect {
         }
     }
 
-    pub unsafe fn render(&self, shader: &Shader, text_shader: &Shader, map: &str) {
+    pub unsafe fn render(&self, shader: &Shader, text_shader: &Shader, map: &Maps) {
         gl::ClearColor(0.1, 0.1, 0.1, 1.0);
         gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
         gl::Disable(gl::DEPTH_TEST);
@@ -88,11 +107,13 @@ impl MapSelect {
         text_mesh.draw();
 
         for button in &self.buttons {
-			let color = if button.id == map {
+			let color = if button.id == *map {
+                Vector3::new(0.9, 0.8, 0.4)
+            } else if button.unlocked && button.id != Maps::None {
                 Vector3::new(0.4, 0.6, 1.0)
             } else {
-                button.color
-            };
+				button.color
+			};
 
 			shader.use_program();
 			shader.set_mat4("projection", &self.ui_projection);

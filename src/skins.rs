@@ -1,19 +1,42 @@
 use nalgebra::{Matrix4, Vector3};
+use serde::{Serialize, Deserialize};
 use crate::math::{scaling, translation, orthographic};
-use crate::menu::Button;
 use crate::mesh::Mesh;
 use crate::shader::Shader;
 use crate::texture::Texture;
 use crate::WorldState;
 
+pub struct SkinButton {
+	pub id: Skins,
+	pub unlocked: bool,
+    pub unlock_requirement: String,
+    pub mesh: Mesh,
+    pub text_mesh: Mesh,
+    pub position: (f32, f32),
+    pub size: (f32, f32),
+    pub color: Vector3<f32>,
+}
+
 pub enum SkinAction {
-	SelectSkin(String),
+	SelectSkin(Skins),
 	ShowMessage(String),
 	Back,
 	None,
 }
+
+#[derive(Serialize, Deserialize, PartialEq, Clone)]
+pub enum Skins {
+	Red(String),
+	Troll(String),
+	Dirt(String),
+	Stone(String),
+	Diamond(String),
+	Emerald(String),
+	Arcane(String),
+	None,
+}
 pub struct SkinSelect {
-    buttons: Vec<Button>,
+    buttons: Vec<SkinButton>,
     ui_projection: Matrix4<f32>,
     screen_width: f32,
     screen_height: f32,
@@ -22,8 +45,8 @@ pub struct SkinSelect {
 impl SkinSelect {
     pub fn new(screen_width: f32, screen_height: f32, world: &WorldState) -> Self {
         let buttons = vec![
-            Button {
-				id: "red".into(),
+            SkinButton {
+				id: Skins::Red("red".into()),
 				unlocked: true,
 				unlock_requirement: "".into(),
                 mesh: Mesh::quad_2d(),
@@ -32,9 +55,9 @@ impl SkinSelect {
                 size: (300.0, 80.0),
                 color: Vector3::new(0.4, 0.4, 0.4),
             },
-            Button {
-				id: "trollFace".into(),
-				unlocked: *world.unlocked_skins.get("trollFace").unwrap_or(&false),
+            SkinButton {
+				id: Skins::Troll("trollFace".into()),
+				unlocked: world.unlocked_skins["troll"],
 				unlock_requirement: "Die 100 times".into(),
                 mesh: Mesh::quad_2d(),
                 text_mesh: Mesh::text("TROLL"),
@@ -42,9 +65,9 @@ impl SkinSelect {
                 size: (300.0, 80.0),
                 color: Vector3::new(0.4, 0.4, 0.4),
             },
-			Button {
-				id: "dirt".into(),
-				unlocked: *world.unlocked_skins.get("dirt").unwrap_or(&false),
+			SkinButton {
+				id: Skins::Dirt("dirt".into()),
+				unlocked:  world.unlocked_skins["dirt"],
 				unlock_requirement: "Reach 300m in cave".into(),
                 mesh: Mesh::quad_2d(),
                 text_mesh: Mesh::text("DIRT"),
@@ -52,9 +75,9 @@ impl SkinSelect {
                 size: (300.0, 80.0),
                 color: Vector3::new(0.4, 0.4, 0.4),
             },
-			Button {
-				id: "chiseledStone".into(),
-				unlocked: *world.unlocked_skins.get("chiseledStone").unwrap_or(&false),
+			SkinButton {
+				id: Skins::Stone("chiseledStone".into()),
+				unlocked:  world.unlocked_skins["stone"],
 				unlock_requirement: "Reach 300m in temple".into(),
                 mesh: Mesh::quad_2d(),
                 text_mesh: Mesh::text("STONE"),
@@ -62,9 +85,9 @@ impl SkinSelect {
                 size: (300.0, 80.0),
                 color: Vector3::new(0.4, 0.4, 0.4),
             },
-			Button {
-				id: "diamondBlock".into(),
-				unlocked: *world.unlocked_skins.get("diamondBlock").unwrap_or(&false),
+			SkinButton {
+				id: Skins::Diamond("diamondBlock".into()),
+				unlocked:  world.unlocked_skins["diamond"],
 				unlock_requirement: "Reach 500m in cave".into(),
                 mesh: Mesh::quad_2d(),
                 text_mesh: Mesh::text("DIAMOND"),
@@ -72,9 +95,9 @@ impl SkinSelect {
                 size: (300.0, 80.0),
                 color: Vector3::new(0.4, 0.4, 0.4),
             },
-            Button {
-				id: "emeraldBlock".into(),
-				unlocked: *world.unlocked_skins.get("emeraldBlock").unwrap_or(&false),
+            SkinButton {
+				id: Skins::Emerald("emeraldBlock".into()),
+				unlocked:  world.unlocked_skins["emerald"],
 				unlock_requirement: "Reach 500m in temple".into(),
                 mesh: Mesh::quad_2d(),
                 text_mesh: Mesh::text("EMERALD"),
@@ -82,9 +105,9 @@ impl SkinSelect {
                 size: (300.0, 80.0),
                 color: Vector3::new(0.4, 0.4, 0.4),
             },
-			Button {
-				id: "arcane".into(),
-				unlocked: *world.unlocked_skins.get("arcane").unwrap_or(&false),
+			SkinButton {
+				id: Skins::Arcane("arcane".into()),
+				unlocked:  world.unlocked_skins["arcane"],
 				unlock_requirement: "Reach 1000m in any map".into(),
                 mesh: Mesh::quad_2d(),
                 text_mesh: Mesh::text("ARCANE"),
@@ -92,8 +115,8 @@ impl SkinSelect {
                 size: (300.0, 80.0),
                 color: Vector3::new(0.4, 0.4, 0.4),
             },
-			Button {
-				id: "".into(),
+			SkinButton {
+				id: Skins::None,
 				unlocked: true,
 				unlock_requirement: "".into(),
                 mesh: Mesh::quad_2d(),
@@ -112,7 +135,7 @@ impl SkinSelect {
         }
     }
 
-    pub unsafe fn render(&self, shader: &Shader, text_shader: &Shader, skin: &str) {
+    pub unsafe fn render(&self, shader: &Shader, text_shader: &Shader, skin: &Skins) {
         gl::ClearColor(0.1, 0.1, 0.1, 1.0);
         gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
         gl::Disable(gl::DEPTH_TEST);
@@ -138,11 +161,13 @@ impl SkinSelect {
         text_mesh.draw();
 
         for button in &self.buttons {
-            let color = if button.id == skin {
-				Vector3::new(0.4, 0.6, 1.0)
-			} else {
-                button.color
-            };
+            let color = if button.id == *skin {
+				Vector3::new(0.9, 0.8, 0.4)
+			} else if button.unlocked && button.id != Skins::None {
+                Vector3::new(0.4, 0.6, 1.0)
+            } else {
+				button.color
+			};
 			
 			shader.use_program();
 			shader.set_mat4("projection", &self.ui_projection);

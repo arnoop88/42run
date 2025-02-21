@@ -1,14 +1,14 @@
+use nalgebra::Vector3;
 use crate::WorldState;
 use crate::character::Character;
 use crate::LevelGenerator;
 use crate::GameState;
 use crate::math;
+use crate::Maps;
 use crate::shader::Shader;
 use crate::mesh::Mesh;
 use crate::texture::Texture;
 use crate::level::ObstacleType;
-
-use nalgebra::Vector3;
 
 pub fn new_game(game_state: &mut GameState, character: &mut Character, world: &mut WorldState, glfw: &glfw::Glfw) {
 	world.z = 0.0;
@@ -145,6 +145,66 @@ pub fn play(world: &mut WorldState, character: &mut Character, game_state: &mut 
     }
 
     if collision_detected {
-        *game_state = GameState::GameOver;
-    }
+		let score = world.z as i32 / 10;
+	
+		// Update deaths and unlock troll skin
+		if !world.unlocked_skins["troll"] {
+			let deaths = world.quest_progress.entry("deaths".into()).or_insert(0);
+			*deaths += 1;
+			if *deaths >= 100 {
+				world.unlocked_skins.insert("troll".into(), true);
+			}
+		}
+	
+		// Update highScore and unlock arcane skin
+		if score > world.quest_progress["highScore"] {
+			world.quest_progress.insert("highScore".into(), score);
+			world.record = true;
+			if !world.unlocked_skins["arcane"] && score >= 1000 {
+				world.unlocked_skins.insert("arcane".into(), true);
+			}
+		}
+
+		match world.current_map {
+			Maps::Cave(..) => {
+				// Update caveGames progress and unlock temple map
+				if !world.unlocked_maps["temple"] {
+					let cave_games = world.quest_progress.entry("caveGames".into()).or_insert(0);
+					*cave_games += 1;
+					if *cave_games >= 10 {
+						world.unlocked_maps.insert("temple".into(), true);
+					}
+				}
+				// Update caveScore and unlock cave skins
+				if score > world.quest_progress["caveScore"] {
+					world.quest_progress.insert("caveScore".into(), score);
+					if !world.unlocked_skins["diamond"] {
+						if !world.unlocked_skins["dirt"] && score >= 300 {
+							world.unlocked_skins.insert("dirt".into(), true);
+						}
+						if score >= 500 {
+							world.unlocked_skins.insert("diamond".into(), true);
+						}
+					}
+				}
+			}
+			Maps::Temple(..) => {
+				// Update templeScore and unlock temple skins
+				if score > world.quest_progress["templeScore"] {
+					world.quest_progress.insert("templeScore".into(), score);
+					if !world.unlocked_skins["emerald"] {
+						if !world.unlocked_skins["stone"] && score >= 300 {
+							world.unlocked_skins.insert("stone".into(), true);
+						}
+						if score >= 500 {
+							world.unlocked_skins.insert("emerald".into(), true);
+						}
+					}
+				}
+			}
+			_ => {}
+		}
+		*game_state = GameState::GameOver;
+	}
+	
 }

@@ -21,9 +21,6 @@ pub struct GameOver {
 impl GameOver {
 	pub fn new(screen_width: f32, screen_height: f32) -> Self {
 		let resume_button = Button {
-			id: "".into(),
-			unlocked: true,
-			unlock_requirement: "".into(),
 			mesh: Mesh::quad_2d(),
 			text_mesh: Mesh::text("RETRY"),
 			position: (screen_width / 2.0 - 150.0, screen_height / 2.0),
@@ -31,9 +28,6 @@ impl GameOver {
 			color: Vector3::new(0.3, 0.8, 0.3),
 		};
 		let quit_button = Button {
-			id: "".into(),
-			unlocked: true,
-			unlock_requirement: "".into(),
 			mesh: Mesh::quad_2d(),
 			text_mesh: Mesh::text("QUIT"),
 			position: (screen_width / 2.0 - 150.0, screen_height / 2.0 - 130.0),
