@@ -54,7 +54,7 @@ impl MapSelect {
             MapButton {
 				id: Maps::Temple("temple".into()),
 				unlocked: world.unlocked_maps["temple"],
-				unlock_requirement: "Play 10 games in cave".into(),
+				unlock_requirement: "Play 15 games in cave".into(),
                 mesh: Mesh::quad_2d(),
                 text_mesh: Mesh::text("TEMPLE"),
                 position: (screen_width / 2.0 - 150.0, screen_height / 2.0 - 50.0),

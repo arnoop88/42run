@@ -169,7 +169,7 @@ pub fn play(world: &mut WorldState, character: &mut Character, game_state: &mut 
 				if !world.unlocked_maps["temple"] {
 					let cave_games = world.quest_progress.entry("caveGames".into()).or_insert(0);
 					*cave_games += 1;
-					if *cave_games >= 10 {
+					if *cave_games >= 15 {
 						world.unlocked_maps.insert("temple".into(), true);
 					}
 				}
