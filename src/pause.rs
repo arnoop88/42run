@@ -40,7 +40,7 @@ impl Pause {
 		Pause { buttons, ui_projection, screen_width, screen_height }
 	}
 	
-	pub unsafe fn render(&self, shader: &Shader, text_shader: &Shader) {
+	pub unsafe fn render(&self, shader: &Shader, text_shader: &Shader, font: &Texture) {
 		gl::Disable(gl::DEPTH_TEST);
         gl::Enable(gl::BLEND);
         gl::BlendFunc(gl::SRC_ALPHA, gl::ONE_MINUS_SRC_ALPHA);
@@ -49,8 +49,6 @@ impl Pause {
 		text_shader.use_program();
 		text_shader.set_mat4("projection", &self.ui_projection);
 		text_shader.set_vec3("textColor", &Vector3::new(0.3, 0.3, 1.0));
-	
-		let font = Texture::new("assets/fonts/MinecraftRegular.png");
 		font.bind(0);
 	
 		let text_scale = 60.0;
@@ -77,7 +75,6 @@ impl Pause {
 			text_shader.use_program();
 			text_shader.set_mat4("projection", &self.ui_projection);
 			text_shader.set_vec3("textColor", &Vector3::new(0.1, 0.0, 0.0));
-			let font = Texture::new("assets/fonts/MinecraftRegular.png");
 			font.bind(0);
 			let text_scale = 50.0;
 			let text_width = button.text_mesh.indices_count as f32 / 6.0 * text_scale * 0.8;

@@ -68,7 +68,7 @@ impl Menu {
         }
     }
 
-    pub unsafe fn render(&self, shader: &Shader, text_shader: &Shader) {
+    pub unsafe fn render(&self, shader: &Shader, text_shader: &Shader, font: &Texture) {
         gl::ClearColor(0.1, 0.1, 0.1, 1.0);
 		gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
 		gl::Disable(gl::DEPTH_TEST);
@@ -79,8 +79,6 @@ impl Menu {
 		text_shader.use_program();
 		text_shader.set_mat4("projection", &self.ui_projection);
 		text_shader.set_vec3("textColor", &Vector3::new(0.4, 0.6, 1.0));
-	
-		let font = Texture::new("assets/fonts/MinecraftRegular.png");
 		font.bind(0);
 	
 		let text_scale = 60.0;
@@ -107,7 +105,6 @@ impl Menu {
 			text_shader.use_program();
 			text_shader.set_mat4("projection", &self.ui_projection);
 			text_shader.set_vec3("textColor", &Vector3::new(0.1, 0.0, 0.0));
-			let font = Texture::new("assets/fonts/MinecraftRegular.png");
 			font.bind(0);
 			let text_scale = 50.0;
 			let text_width = button.text_mesh.indices_count as f32 / 6.0 * text_scale * 0.8;
@@ -144,7 +141,7 @@ impl Menu {
     }
 }
 
-pub unsafe fn render_message(msg: &String, shader: &Shader, text_shader: &Shader, screen_width: f32, screen_height: f32) {
+pub unsafe fn render_message(msg: &String, shader: &Shader, text_shader: &Shader, screen_width: f32, screen_height: f32, font: &Texture) {
 	gl::Disable(gl::DEPTH_TEST);
 	gl::Enable(gl::BLEND);
 	gl::BlendFunc(gl::SRC_ALPHA, gl::ONE_MINUS_SRC_ALPHA);
@@ -165,7 +162,6 @@ pub unsafe fn render_message(msg: &String, shader: &Shader, text_shader: &Shader
 	// Message text
 	text_shader.use_program();
 	text_shader.set_vec3("textColor", &Vector3::new(1.0, 1.0, 1.0));
-	let font = Texture::new("assets/fonts/MinecraftRegular.png");
 	font.bind(0);
 	let text_mesh = Mesh::text(msg);
 	let scale = 40.0;

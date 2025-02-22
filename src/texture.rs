@@ -6,6 +6,12 @@ pub struct Texture {
     pub id: GLuint,
 }
 
+impl Drop for Texture {
+    fn drop(&mut self) {
+        unsafe { gl::DeleteTextures(1, &self.id) };
+    }
+}
+
 impl Texture {
     pub fn new(path: &str) -> Self {
         // Load PNG file

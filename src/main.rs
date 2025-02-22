@@ -114,6 +114,7 @@ fn main() {
 	let text_shader = shader::Shader::new("shaders/vertex/text.glsl", "shaders/fragment/text.glsl").expect("Failed to load text shaders");
 
 	let mut textures = HashMap::new();
+	textures.insert("font".into(), Texture::new("assets/fonts/MinecraftRegular.png"));
 	textures.insert("skin".into(), Texture::new("assets/textures/skins/red.png"));
 	textures.insert("floor".into(), Texture::new("assets/textures/maps/cave/floor.png"));
 	textures.insert("wall".into(), Texture::new("assets/textures/maps/cave/wall.png"));
@@ -205,7 +206,7 @@ fn main() {
 
 		match game_state {
 			GameState::Menu => {
-				unsafe { world.menu.render(&ui_shader, &text_shader); }
+				unsafe { world.menu.render(&ui_shader, &text_shader, &world.textures["font"]); }
 				if world.mouse_clicked {
 					match world.menu.handle_click(world.mouse_x, world.mouse_y) {
 						MenuAction::Play => new_game(&mut game_state, &mut character, &mut world, &glfw),
@@ -219,7 +220,7 @@ fn main() {
 			},
 			GameState::MapSelect => {
 				let map_select = MapSelect::new(SCREEN_WIDTH, SCREEN_HEIGHT, &world);
-				unsafe { map_select.render(&ui_shader, &text_shader, &world.current_map); }
+				unsafe { map_select.render(&ui_shader, &text_shader, &world.current_map, &world.textures["font"]); }
 				if world.mouse_clicked {
 					match map_select.handle_click(world.mouse_x, world.mouse_y) {
 						MapAction::SelectMap(map) => {
@@ -238,7 +239,7 @@ fn main() {
 			}
 			GameState::SkinSelect => {
 				let skin_select = SkinSelect::new(SCREEN_WIDTH, SCREEN_HEIGHT, &world);
-				unsafe { skin_select.render(&ui_shader, &text_shader, &world.current_skin); }
+				unsafe { skin_select.render(&ui_shader, &text_shader, &world.current_skin, &world.textures["font"]); }
 				if world.mouse_clicked {
 					match skin_select.handle_click(world.mouse_x, world.mouse_y) {
 						SkinAction::SelectSkin(skin) => {
@@ -257,7 +258,7 @@ fn main() {
 			}
 			GameState::ShowMessage(ref msg) => {
 				unsafe {
-					render_message(&msg, &ui_shader, &text_shader, world.screen_width, world.screen_height);
+					render_message(&msg, &ui_shader, &text_shader, world.screen_width, world.screen_height, &world.textures["font"]);
 					if world.mouse_clicked {
 						game_state = previous_state.clone();
 						world.mouse_clicked = false;
@@ -273,7 +274,7 @@ fn main() {
 				play(&mut world, &mut character, &mut game_state, &game_shader, &character_mesh, &text_shader, delta_time);
 			}
 			GameState::Paused => {
-				unsafe { world.pause.render(&ui_shader, &text_shader); }
+				unsafe { world.pause.render(&ui_shader, &text_shader, &world.textures["font"]); }
 				if world.mouse_clicked {
 					match world.pause.handle_click(world.mouse_x, world.mouse_y) {
 						PauseAction::Resume => {
@@ -288,7 +289,7 @@ fn main() {
 			}
 			GameState::GameOver => {
 				unsafe {
-					world.game_over.render(&ui_shader, &text_shader, *world.quest_progress.get("highScore").unwrap_or(&0), world.record);
+					world.game_over.render(&ui_shader, &text_shader, *world.quest_progress.get("highScore").unwrap_or(&0), world.record, &world.textures["font"]);
 				}
 				if world.mouse_clicked {
 					match world.game_over.handle_click(world.mouse_x, world.mouse_y) {

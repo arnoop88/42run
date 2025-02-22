@@ -16,6 +16,16 @@ pub struct Mesh {
     pub indices_count: i32,
 }
 
+impl Drop for Mesh {
+    fn drop(&mut self) {
+        unsafe {
+            gl::DeleteVertexArrays(1, &self.vao);
+            gl::DeleteBuffers(1, &self.vbo);
+            gl::DeleteBuffers(1, &self.ebo);
+        }
+    }
+}
+
 impl Mesh {
 	pub const PLAYER_COLOR: Vector3<f32> = Vector3::new(1.0, 0.0, 0.0); // Red
     pub const OBSTACLE_COLOR: Vector3<f32> = Vector3::new(1.0, 1.0, 0.0); // Yellow
@@ -363,14 +373,4 @@ impl Mesh {
 		Mesh::new(&vertices, &indices)
 	}
 	
-}
-
-impl Drop for Mesh {
-    fn drop(&mut self) {
-        unsafe {
-            gl::DeleteVertexArrays(1, &self.vao);
-            gl::DeleteBuffers(1, &self.vbo);
-            gl::DeleteBuffers(1, &self.ebo);
-        }
-    }
 }

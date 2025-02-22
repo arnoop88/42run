@@ -7,7 +7,6 @@ use crate::math;
 use crate::Maps;
 use crate::shader::Shader;
 use crate::mesh::Mesh;
-use crate::texture::Texture;
 use crate::level::ObstacleType;
 
 pub fn new_game(game_state: &mut GameState, character: &mut Character, world: &mut WorldState, glfw: &glfw::Glfw) {
@@ -122,12 +121,11 @@ pub fn play(world: &mut WorldState, character: &mut Character, game_state: &mut 
 
         let distance_text = format!("{}m", world.z as i32 / 10);
         let text_mesh = Mesh::text(&distance_text);
-		let font = Texture::new("assets/fonts/MinecraftRegular.png");
         
         text_shader.use_program();
         let ui_projection = math::orthographic(0.0, world.screen_width, 0.0, world.screen_height, -1.0, 1.0);
         text_shader.set_mat4("projection", &ui_projection);
-        font.bind(0);
+        world.textures["font"].bind(0);
         text_shader.set_vec3("textColor", &Vector3::new(0.9, 0.9, 0.9));
 
         let text_scale = 40.0;
