@@ -16,7 +16,16 @@ pub fn handle_keys(window: &mut glfw::Window, event: WindowEvent, game_state: &m
                     }
                     Key::Left | Key::A if action == Action::Press => character.move_left(),
                     Key::Right | Key::D if action == Action::Press => character.move_right(),
-                    Key::Space | Key::Up | Key::W if action == Action::Press => character.jump(),
+                    Key::Space | Key::Up | Key::W if action == Action::Press => {
+						character.jump();
+						if !world.unlocked_skins["jumper"] {
+							let jumps = world.quest_progress.entry("jumps".into()).or_insert(0);
+							*jumps += 1;
+							if *jumps >= 500 {
+								world.unlocked_skins.insert("jumper".into(), true);
+							}
+						}
+					}
                     Key::Down | Key::S => {
 						let is_pressed = match action {
 							glfw::Action::Press | glfw::Action::Repeat => true,

@@ -27,6 +27,7 @@ pub enum SkinAction {
 #[derive(Serialize, Deserialize, PartialEq, Clone)]
 pub enum Skins {
 	Red(String),
+	Jumper(String),
 	Troll(String),
 	Dirt(String),
 	Stone(String),
@@ -51,7 +52,17 @@ impl SkinSelect {
 				unlock_requirement: "".into(),
                 mesh: Mesh::quad_2d(),
                 text_mesh: Mesh::text("RED"),
-                position: (screen_width / 4.0 - 210.0, screen_height / 2.0 + 50.0),
+                position: Self::button_position(0, screen_width, screen_height),
+                size: (300.0, 80.0),
+                color: Vector3::new(0.4, 0.4, 0.4),
+            },
+			SkinButton {
+				id: Skins::Jumper("jumper".into()),
+				unlocked: world.unlocked_skins["jumper"],
+				unlock_requirement: "Jump 500 times".into(),
+                mesh: Mesh::quad_2d(),
+                text_mesh: Mesh::text("JUMPER"),
+                position: Self::button_position(1, screen_width, screen_height),
                 size: (300.0, 80.0),
                 color: Vector3::new(0.4, 0.4, 0.4),
             },
@@ -61,57 +72,57 @@ impl SkinSelect {
 				unlock_requirement: "Die 100 times".into(),
                 mesh: Mesh::quad_2d(),
                 text_mesh: Mesh::text("TROLL"),
-                position: (screen_width / 2.0  - 150.0, screen_height / 2.0 + 50.0),
+                position: Self::button_position(2, screen_width, screen_height),
                 size: (300.0, 80.0),
                 color: Vector3::new(0.4, 0.4, 0.4),
             },
 			SkinButton {
 				id: Skins::Dirt("dirt".into()),
-				unlocked:  world.unlocked_skins["dirt"],
+				unlocked: world.unlocked_skins["dirt"],
 				unlock_requirement: "Reach 300m in cave".into(),
                 mesh: Mesh::quad_2d(),
                 text_mesh: Mesh::text("DIRT"),
-                position: (screen_width * 0.75 - 90.0, screen_height / 2.0 + 50.0),
+                position: Self::button_position(3, screen_width, screen_height),
                 size: (300.0, 80.0),
                 color: Vector3::new(0.4, 0.4, 0.4),
             },
 			SkinButton {
 				id: Skins::Stone("chiseledStone".into()),
-				unlocked:  world.unlocked_skins["stone"],
+				unlocked: world.unlocked_skins["stone"],
 				unlock_requirement: "Reach 300m in temple".into(),
                 mesh: Mesh::quad_2d(),
                 text_mesh: Mesh::text("STONE"),
-                position: (screen_width / 4.0 - 210.0, screen_height / 2.0 - 50.0),
+                position: Self::button_position(4, screen_width, screen_height),
                 size: (300.0, 80.0),
                 color: Vector3::new(0.4, 0.4, 0.4),
             },
 			SkinButton {
 				id: Skins::Diamond("diamondBlock".into()),
-				unlocked:  world.unlocked_skins["diamond"],
+				unlocked: world.unlocked_skins["diamond"],
 				unlock_requirement: "Reach 500m in cave".into(),
                 mesh: Mesh::quad_2d(),
                 text_mesh: Mesh::text("DIAMOND"),
-                position: (screen_width / 2.0 - 150.0, screen_height / 2.0 - 50.0),
+                position: Self::button_position(5, screen_width, screen_height),
                 size: (300.0, 80.0),
                 color: Vector3::new(0.4, 0.4, 0.4),
             },
             SkinButton {
 				id: Skins::Emerald("emeraldBlock".into()),
-				unlocked:  world.unlocked_skins["emerald"],
+				unlocked: world.unlocked_skins["emerald"],
 				unlock_requirement: "Reach 500m in temple".into(),
                 mesh: Mesh::quad_2d(),
                 text_mesh: Mesh::text("EMERALD"),
-                position: (screen_width * 0.75  - 90.0, screen_height / 2.0 - 50.0),
+                position: Self::button_position(6, screen_width, screen_height),
                 size: (300.0, 80.0),
                 color: Vector3::new(0.4, 0.4, 0.4),
             },
 			SkinButton {
 				id: Skins::Arcane("arcane".into()),
-				unlocked:  world.unlocked_skins["arcane"],
+				unlocked: world.unlocked_skins["arcane"],
 				unlock_requirement: "Reach 1000m in any map".into(),
                 mesh: Mesh::quad_2d(),
                 text_mesh: Mesh::text("ARCANE"),
-                position: (screen_width / 4.0 - 210.0, screen_height / 2.0 - 150.0),
+                position: Self::button_position(7, screen_width, screen_height),
                 size: (300.0, 80.0),
                 color: Vector3::new(0.4, 0.4, 0.4),
             },
@@ -121,7 +132,7 @@ impl SkinSelect {
 				unlock_requirement: "".into(),
                 mesh: Mesh::quad_2d(),
                 text_mesh: Mesh::text("BACK"),
-                position: (screen_width / 2.0 - 150.0, 50.0),
+                position: Self::button_position(9, screen_width, screen_height),
                 size: (300.0, 80.0),
                 color: Vector3::new(0.9, 0.6, 0.0),
             }
@@ -191,6 +202,33 @@ impl SkinSelect {
         }
     }
 
+	fn button_position(index: usize, screen_width: f32, screen_height: f32) -> (f32, f32) {
+		const BUTTON_WIDTH: f32 = 300.0;
+		const BUTTON_HEIGHT: f32 = 80.0;
+		const HORIZONTAL_SPACING: f32 = 20.0;
+		const VERTICAL_SPACING: f32 = 20.0;
+		const COLUMNS: usize = 3;
+		
+		match index {
+			9 => (screen_width / 2.0 - BUTTON_WIDTH / 2.0, 50.0),
+			_ => {
+				let row = index / COLUMNS;
+				let col = index % COLUMNS;
+				
+				let x_start = (screen_width - 
+					(COLUMNS as f32 * BUTTON_WIDTH + 
+					(COLUMNS as f32 - 1.0) * HORIZONTAL_SPACING)) / 2.0;
+				
+				let y_start = screen_height / 2.0 + 50.0;
+				
+				(
+					x_start + col as f32 * (BUTTON_WIDTH + HORIZONTAL_SPACING),
+					y_start - row as f32 * (BUTTON_HEIGHT + VERTICAL_SPACING)
+				)
+			}
+		}
+	}
+
     pub fn handle_click(&self, mouse_x: f32, mouse_y: f32) -> SkinAction {
         for (i, button) in self.buttons.iter().enumerate() {
             if mouse_x >= button.position.0 &&
@@ -202,8 +240,8 @@ impl SkinSelect {
 					return SkinAction::ShowMessage(button.unlock_requirement.clone());
 				}
                 return match i {
-                    0..=6 => SkinAction::SelectSkin(button.id.clone()),
-                    7 => SkinAction::Back,
+                    0..=7 => SkinAction::SelectSkin(button.id.clone()),
+                    8 => SkinAction::Back,
                     _ => SkinAction::None,
                 };
             }

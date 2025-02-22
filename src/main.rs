@@ -81,7 +81,7 @@ impl WorldState {
 	fn change_skin(&mut self) {
 		let skin_path = match &self.current_skin {
             Skins::Red(path) | Skins::Troll(path) | Skins::Dirt(path) | Skins::Stone(path) |
-            Skins::Diamond(path) | Skins::Emerald(path) | Skins::Arcane(path) => format!("assets/textures/skins/{}", path),
+            Skins::Diamond(path) | Skins::Emerald(path) | Skins::Arcane(path) | Skins::Jumper(path) => format!("assets/textures/skins/{}", path),
             Skins::None => String::from("assets/textures/skins/red.png"),
         };
 
@@ -153,6 +153,7 @@ fn main() {
 		]),
 		unlocked_skins: HashMap::from([
 			("red".into(), true),
+			("jumper".into(), false),
 			("troll".into(), false),
 			("dirt".into(), false),
 			("stone".into(), false),
@@ -166,6 +167,7 @@ fn main() {
 			("templeScore".into(), 0),
 			("deaths".into(), 0),
 			("caveGames".into(), 0),
+			("jumps".into(), 0),
 		]),
     };
 	if let Ok(save_data) = load_progress() {
