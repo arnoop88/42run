@@ -80,6 +80,14 @@ pub fn play(world: &mut WorldState, character: &mut Character, game_state: &mut 
             for obstacle in &segment.obstacles {
                 let obstacle_aabb = obstacle.get_aabb();
                 if player_aabb.collides(&obstacle_aabb) {
+					let score = world.z as i32 / 10;
+					if score >= 350 {
+						world.audio.play_sound("collision2");
+					} else {
+						world.audio.play_sound("collision1");
+					}
+					world.audio.stop_music();
+					world.current_music = None;
                     collision_detected = true;
                 }
 
@@ -144,7 +152,7 @@ pub fn play(world: &mut WorldState, character: &mut Character, game_state: &mut 
 
     if collision_detected {
 		let score = world.z as i32 / 10;
-	
+
 		// Update deaths and unlock troll skin
 		if !world.unlocked_skins["troll"] {
 			let deaths = world.quest_progress.entry("deaths".into()).or_insert(0);

@@ -1,4 +1,5 @@
 use nalgebra::{Matrix4, Vector3};
+use crate::audio::AudioSystem;
 use crate::menu::Button;
 use crate::math::{translation, scaling, orthographic};
 use crate::shader::Shader;
@@ -118,13 +119,14 @@ impl GameOver {
         gl::Enable(gl::DEPTH_TEST);
 	}
 
-	pub fn handle_click(&self, mouse_x: f32, mouse_y: f32) -> GameOverAction {
+	pub fn handle_click(&self, mouse_x: f32, mouse_y: f32, audio: &AudioSystem) -> GameOverAction {
 		for (i, button) in self.buttons.iter().enumerate() {
 			if mouse_x >= button.position.0 &&
 				mouse_x <= button.position.0 + button.size.0 &&
 				mouse_y >= button.position.1 &&
 				mouse_y <= button.position.1 + button.size.1
 			{
+				audio.play_sound("button1");
 				return match i {
 					0 => GameOverAction::NewGame,
 					1 => GameOverAction::Quit,

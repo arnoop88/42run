@@ -1,5 +1,6 @@
 use nalgebra::{Matrix4, Vector3};
 use serde::{Serialize, Deserialize};
+use crate::audio::AudioSystem;
 use crate::math::{scaling, translation, orthographic};
 use crate::mesh::Mesh;
 use crate::shader::Shader;
@@ -137,7 +138,7 @@ impl MapSelect {
         }
     }
 
-    pub fn handle_click(&self, mouse_x: f32, mouse_y: f32) -> MapAction {
+    pub fn handle_click(&self, mouse_x: f32, mouse_y: f32, audio: &AudioSystem, current: &Maps) -> MapAction {
         for (i, button) in self.buttons.iter().enumerate() {
             if mouse_x >= button.position.0 &&
                 mouse_x <= button.position.0 + button.size.0 &&
@@ -146,6 +147,11 @@ impl MapSelect {
             {
 				if !button.unlocked {
 					return MapAction::ShowMessage(button.unlock_requirement.clone());
+				}
+				if button.id == Maps::None {
+					audio.play_sound("button1");
+				} else if button.id != *current {
+					audio.play_sound("button2");
 				}
                 return match i {
                     0..=1 => MapAction::SelectMap(button.id.clone()),

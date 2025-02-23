@@ -14,10 +14,10 @@ pub fn handle_keys(window: &mut glfw::Window, event: WindowEvent, game_state: &m
                         world.pause_start_time = glfw.get_time();
 						character.move_down(false);
                     }
-                    Key::Left | Key::A if action == Action::Press => character.move_left(),
-                    Key::Right | Key::D if action == Action::Press => character.move_right(),
+                    Key::Left | Key::A if action == Action::Press => character.move_left(&world.audio),
+                    Key::Right | Key::D if action == Action::Press => character.move_right(&world.audio),
                     Key::Space | Key::Up | Key::W if action == Action::Press => {
-						character.jump();
+						character.jump(&world.audio);
 						if !world.unlocked_skins["jumper"] {
 							let jumps = world.quest_progress.entry("jumps".into()).or_insert(0);
 							*jumps += 1;
@@ -36,12 +36,21 @@ pub fn handle_keys(window: &mut glfw::Window, event: WindowEvent, game_state: &m
                     _ => {}
                 },
                 GameState::Menu => match key {
-					Key::Escape if action == Action::Press => window.set_should_close(true),
-					Key::Enter if action == Action::Press => new_game(game_state, character, world, glfw),
+					Key::Escape if action == Action::Press => {
+						world.audio.play_sound("button1");
+						window.set_should_close(true);
+					}
+					Key::Enter if action == Action::Press => {
+						world.audio.play_sound("button1");
+						new_game(game_state, character, world, glfw);
+					}
                     _ => {}
                 },
 				GameState::MapSelect | GameState::SkinSelect => match key {
-					Key::Escape if action == Action::Press => *game_state = GameState::Menu,
+					Key::Escape if action == Action::Press => {
+						world.audio.play_sound("button1");
+						*game_state = GameState::Menu;
+					}
                     _ => {}
                 },
 				GameState::ShowMessage(_) => match key {
@@ -49,16 +58,27 @@ pub fn handle_keys(window: &mut glfw::Window, event: WindowEvent, game_state: &m
 					_ => {}
 				}
                 GameState::Paused => match key {
-					Key::Escape | Key::Q if action == Action::Press => *game_state = GameState::Menu,
+					Key::Escape | Key::Q if action == Action::Press => {
+						world.audio.play_sound("button1");
+						*game_state = GameState::Menu;
+					}
                     Key::Enter | Key::R if action == Action::Press => {
+						world.audio.play_sound("button1");
+						world.audio.resume_music();
 						*game_state = GameState::Playing;
 						world.total_pause_time += glfw.get_time() - world.pause_start_time;
 					}
                     _ => {}
                 },
                 GameState::GameOver => match key {
-                    Key::Escape | Key::Q if action == Action::Press => *game_state = GameState::Menu,
-					Key::Enter | Key::R if action == Action::Press => new_game(game_state, character, world, glfw),
+                    Key::Escape | Key::Q if action == Action::Press => {
+						world.audio.play_sound("button1");
+						*game_state = GameState::Menu;
+					}
+					Key::Enter | Key::R if action == Action::Press => {
+						world.audio.play_sound("button1");
+						new_game(game_state, character, world, glfw);
+					}
                     _ => {}
                 },
             }

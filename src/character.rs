@@ -1,5 +1,6 @@
 use nalgebra::{Vector3, Point3};
 use crate::LevelGenerator;
+use crate::AudioSystem;
 
 pub struct AABB {
     pub min: Point3<f32>,
@@ -111,23 +112,26 @@ impl Character {
 		self.is_pressing_down = state;
 	}
 
-    pub fn jump(&mut self) {
+    pub fn jump(&mut self, audio: &AudioSystem) {
         if self.is_grounded {
-            self.velocity.y = Self::JUMP_FORCE;
+            audio.play_sound("jump");
+			self.velocity.y = Self::JUMP_FORCE;
             self.is_grounded = false;
 			self.target_height = self.normal_height;
         }
     }
 
-    pub fn move_right(&mut self) {
+    pub fn move_right(&mut self, audio: &AudioSystem) {
         if self.lane > -1 {
+			audio.play_sound("slide");
             self.lane -= 1;
             self.target_x = self.lane as f32 * LevelGenerator::LANE_WIDTH;
         }
     }
 
-    pub fn move_left(&mut self) {
+    pub fn move_left(&mut self, audio: &AudioSystem) {
         if self.lane < 1 {
+			audio.play_sound("slide");
             self.lane += 1;
             self.target_x = self.lane as f32 * LevelGenerator::LANE_WIDTH;
         }

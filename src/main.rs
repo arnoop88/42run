@@ -12,6 +12,7 @@ mod game_over;
 mod maps;
 mod skins;
 mod save_data;
+mod audio;
 
 use glfw::{Action, Context, WindowEvent, MouseButton};
 use std::collections::HashMap;
@@ -26,6 +27,7 @@ use crate::maps::{MapSelect, MapAction, Maps};
 use crate::skins::{SkinSelect, SkinAction, Skins};
 use crate::texture::Texture;
 use crate::save_data::{save_progress, load_progress, extract_save_data};
+use crate::audio::AudioSystem;
 
 #[derive(Clone)]
 enum GameState {
@@ -56,7 +58,9 @@ struct WorldState {
 	record: bool,
 	current_skin: Skins,
 	current_map: Maps,
+	current_music: Option<String>,
 	textures: HashMap<String, Texture>,
+	audio: AudioSystem,
 	unlocked_maps: HashMap<String, bool>,
     unlocked_skins: HashMap<String, bool>,
     quest_progress: HashMap<String, i32>,
@@ -124,6 +128,17 @@ fn main() {
 	textures.insert("tallWall".into(), Texture::new("assets/textures/maps/cave/tallWall.png"));
 	textures.insert("highBar".into(), Texture::new("assets/textures/maps/cave/highBar.png"));
 
+	let mut audio = AudioSystem::new();
+    audio.load_sound("jump", "assets/sounds/jump.wav");
+	audio.load_sound("slide", "assets/sounds/slide.wav");
+    audio.load_sound("collision1", "assets/sounds/diarrhea.wav");
+	audio.load_sound("collision2", "assets/sounds/explosion.wav");
+	audio.load_sound("button1", "assets/sounds/button1.wav");
+	audio.load_sound("button2", "assets/sounds/button2.wav");
+    // audio.load_sound("select", "assets/sounds/select.wav");
+	audio.music_volume(0.4);
+	audio.sound_volume(0.4);
+
     let character_mesh = Mesh::cube(Mesh::PLAYER_COLOR);
 	let mut game_state = GameState::Menu;
 	let mut previous_state= GameState::Menu;
@@ -146,7 +161,9 @@ fn main() {
 		record: false,
 		current_skin: Skins::Red("red".into()),
 		current_map: Maps::Cave("cave".into()),
+		current_music: None,
 		textures,
+		audio,
 		unlocked_maps: HashMap::from([
 			("cave".into(), true),
 			("temple".into(), false),
@@ -208,9 +225,13 @@ fn main() {
 
 		match game_state {
 			GameState::Menu => {
+				if world.current_music != Some("menu".to_string()) {
+					world.audio.play_music("assets/music/megalovania.wav");
+					world.current_music = Some("menu".to_string());
+				}
 				unsafe { world.menu.render(&ui_shader, &text_shader, &world.textures["font"]); }
 				if world.mouse_clicked {
-					match world.menu.handle_click(world.mouse_x, world.mouse_y) {
+					match world.menu.handle_click(world.mouse_x, world.mouse_y, &world.audio) {
 						MenuAction::Play => new_game(&mut game_state, &mut character, &mut world, &glfw),
 						MenuAction::MapSelect => game_state = GameState::MapSelect,
 						MenuAction::SkinSelect => game_state = GameState::SkinSelect,
@@ -224,7 +245,7 @@ fn main() {
 				let map_select = MapSelect::new(SCREEN_WIDTH, SCREEN_HEIGHT, &world);
 				unsafe { map_select.render(&ui_shader, &text_shader, &world.current_map, &world.textures["font"]); }
 				if world.mouse_clicked {
-					match map_select.handle_click(world.mouse_x, world.mouse_y) {
+					match map_select.handle_click(world.mouse_x, world.mouse_y, &world.audio, &world.current_map) {
 						MapAction::SelectMap(map) => {
 							world.current_map = map;
 							world.change_map();
@@ -243,7 +264,7 @@ fn main() {
 				let skin_select = SkinSelect::new(SCREEN_WIDTH, SCREEN_HEIGHT, &world);
 				unsafe { skin_select.render(&ui_shader, &text_shader, &world.current_skin, &world.textures["font"]); }
 				if world.mouse_clicked {
-					match skin_select.handle_click(world.mouse_x, world.mouse_y) {
+					match skin_select.handle_click(world.mouse_x, world.mouse_y, &world.audio, &world.current_skin) {
 						SkinAction::SelectSkin(skin) => {
 							world.current_skin = skin;
 							world.change_skin();
@@ -268,6 +289,17 @@ fn main() {
 				}
 			}
 			GameState::Playing => {
+				let map_music = match world.current_map {
+					Maps::Cave(_) => "assets/music/heartache.wav",
+					Maps::Temple(_) => "assets/music/spear_of_justice.wav",
+					_ => "assets/music/megalovania.wav",
+				};
+
+				if world.current_music.as_deref() != Some(map_music) {
+					world.audio.play_music(map_music);
+					world.current_music = Some(map_music.to_string());
+				}
+
 				let current_time: f64 = glfw.get_time();
 				let adjusted_time: f64 = current_time - world.total_pause_time;
 				let delta_time: f32 = (adjusted_time - world.last_frame_time) as f32;
@@ -276,10 +308,12 @@ fn main() {
 				play(&mut world, &mut character, &mut game_state, &game_shader, &character_mesh, &text_shader, delta_time);
 			}
 			GameState::Paused => {
+				world.audio.pause_music();
 				unsafe { world.pause.render(&ui_shader, &text_shader, &world.textures["font"]); }
 				if world.mouse_clicked {
-					match world.pause.handle_click(world.mouse_x, world.mouse_y) {
+					match world.pause.handle_click(world.mouse_x, world.mouse_y, &world.audio) {
 						PauseAction::Resume => {
+							world.audio.resume_music();
 							game_state = GameState::Playing;
 							world.total_pause_time += glfw.get_time() - world.pause_start_time;
 						}
@@ -294,7 +328,7 @@ fn main() {
 					world.game_over.render(&ui_shader, &text_shader, *world.quest_progress.get("highScore").unwrap_or(&0), world.record, &world.textures["font"]);
 				}
 				if world.mouse_clicked {
-					match world.game_over.handle_click(world.mouse_x, world.mouse_y) {
+					match world.game_over.handle_click(world.mouse_x, world.mouse_y, &world.audio) {
 						GameOverAction::NewGame => new_game(&mut game_state, &mut character, &mut world, &glfw),
 						GameOverAction::Quit => game_state = GameState::Menu,
 						GameOverAction::None => {}
