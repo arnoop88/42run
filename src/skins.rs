@@ -5,7 +5,7 @@ use crate::math::{scaling, translation, orthographic};
 use crate::mesh::Mesh;
 use crate::shader::Shader;
 use crate::texture::Texture;
-use crate::WorldState;
+use std::collections::HashMap;
 
 pub struct SkinButton {
 	pub id: Skins,
@@ -45,7 +45,7 @@ pub struct SkinSelect {
 }
 
 impl SkinSelect {
-    pub fn new(screen_width: f32, screen_height: f32, world: &WorldState) -> Self {
+    pub fn new(screen_width: f32, screen_height: f32, unlocked_skins: &HashMap<String, bool>) -> Self {
         let buttons = vec![
             SkinButton {
 				id: Skins::Red("red".into()),
@@ -59,7 +59,7 @@ impl SkinSelect {
             },
 			SkinButton {
 				id: Skins::Jumper("jumper".into()),
-				unlocked: world.unlocked_skins["jumper"],
+				unlocked: unlocked_skins["jumper"],
 				unlock_requirement: "Jump 500 times".into(),
                 mesh: Mesh::quad_2d(),
                 text_mesh: Mesh::text("JUMPER"),
@@ -69,7 +69,7 @@ impl SkinSelect {
             },
             SkinButton {
 				id: Skins::Troll("trollFace".into()),
-				unlocked: world.unlocked_skins["troll"],
+				unlocked: unlocked_skins["troll"],
 				unlock_requirement: "Die 100 times".into(),
                 mesh: Mesh::quad_2d(),
                 text_mesh: Mesh::text("TROLL"),
@@ -79,7 +79,7 @@ impl SkinSelect {
             },
 			SkinButton {
 				id: Skins::Dirt("dirt".into()),
-				unlocked: world.unlocked_skins["dirt"],
+				unlocked: unlocked_skins["dirt"],
 				unlock_requirement: "Reach 300m in cave".into(),
                 mesh: Mesh::quad_2d(),
                 text_mesh: Mesh::text("DIRT"),
@@ -89,7 +89,7 @@ impl SkinSelect {
             },
 			SkinButton {
 				id: Skins::Stone("chiseledStone".into()),
-				unlocked: world.unlocked_skins["stone"],
+				unlocked: unlocked_skins["stone"],
 				unlock_requirement: "Reach 300m in temple".into(),
                 mesh: Mesh::quad_2d(),
                 text_mesh: Mesh::text("STONE"),
@@ -99,7 +99,7 @@ impl SkinSelect {
             },
 			SkinButton {
 				id: Skins::Diamond("diamondBlock".into()),
-				unlocked: world.unlocked_skins["diamond"],
+				unlocked: unlocked_skins["diamond"],
 				unlock_requirement: "Reach 500m in cave".into(),
                 mesh: Mesh::quad_2d(),
                 text_mesh: Mesh::text("DIAMOND"),
@@ -109,7 +109,7 @@ impl SkinSelect {
             },
             SkinButton {
 				id: Skins::Emerald("emeraldBlock".into()),
-				unlocked: world.unlocked_skins["emerald"],
+				unlocked: unlocked_skins["emerald"],
 				unlock_requirement: "Reach 500m in temple".into(),
                 mesh: Mesh::quad_2d(),
                 text_mesh: Mesh::text("EMERALD"),
@@ -119,7 +119,7 @@ impl SkinSelect {
             },
 			SkinButton {
 				id: Skins::Arcane("arcane".into()),
-				unlocked: world.unlocked_skins["arcane"],
+				unlocked: unlocked_skins["arcane"],
 				unlock_requirement: "Reach 1000m in any map".into(),
                 mesh: Mesh::quad_2d(),
                 text_mesh: Mesh::text("ARCANE"),
@@ -148,7 +148,6 @@ impl SkinSelect {
     }
 
     pub unsafe fn render(&self, shader: &Shader, text_shader: &Shader, skin: &Skins, font: &Texture) {
-        gl::ClearColor(0.1, 0.1, 0.1, 1.0);
         gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
         gl::Disable(gl::DEPTH_TEST);
         gl::Enable(gl::BLEND);

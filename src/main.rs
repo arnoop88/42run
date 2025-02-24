@@ -135,7 +135,6 @@ fn main() {
 	audio.load_sound("collision2", "assets/sounds/explosion.wav");
 	audio.load_sound("button1", "assets/sounds/button1.wav");
 	audio.load_sound("button2", "assets/sounds/button2.wav");
-    // audio.load_sound("select", "assets/sounds/select.wav");
 	audio.music_volume(0.4);
 	audio.sound_volume(0.4);
 
@@ -200,6 +199,8 @@ fn main() {
 			world.change_skin();
 		}
     }
+	let mut map_select = MapSelect::new(SCREEN_WIDTH, SCREEN_HEIGHT, &world.unlocked_maps);
+	let mut skin_select = SkinSelect::new(SCREEN_WIDTH, SCREEN_HEIGHT, &world.unlocked_skins);
 
     while !window.should_close() {
         for (_, event) in glfw::flush_messages(&events) {
@@ -209,6 +210,10 @@ fn main() {
 					world.screen_width = width as f32;
 					world.screen_height = height as f32;
 					world.menu = Menu::new(world.screen_width, world.screen_height);
+					world.pause = Pause::new(world.screen_width, world.screen_height);
+					world.game_over = GameOver::new(world.screen_width, world.screen_height);
+					map_select = MapSelect::new(world.screen_width, world.screen_height, &world.unlocked_maps);
+					skin_select = SkinSelect::new(world.screen_width, world.screen_height, &world.unlocked_skins);
 				}
 				WindowEvent::CursorPos(x, y) => {
 					world.mouse_x = x as f32;
@@ -242,7 +247,6 @@ fn main() {
 				}
 			},
 			GameState::MapSelect => {
-				let map_select = MapSelect::new(SCREEN_WIDTH, SCREEN_HEIGHT, &world);
 				unsafe { map_select.render(&ui_shader, &text_shader, &world.current_map, &world.textures["font"]); }
 				if world.mouse_clicked {
 					match map_select.handle_click(world.mouse_x, world.mouse_y, &world.audio, &world.current_map) {
@@ -261,7 +265,6 @@ fn main() {
 				}
 			}
 			GameState::SkinSelect => {
-				let skin_select = SkinSelect::new(SCREEN_WIDTH, SCREEN_HEIGHT, &world);
 				unsafe { skin_select.render(&ui_shader, &text_shader, &world.current_skin, &world.textures["font"]); }
 				if world.mouse_clicked {
 					match skin_select.handle_click(world.mouse_x, world.mouse_y, &world.audio, &world.current_skin) {

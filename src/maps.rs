@@ -5,7 +5,7 @@ use crate::math::{scaling, translation, orthographic};
 use crate::mesh::Mesh;
 use crate::shader::Shader;
 use crate::texture::Texture;
-use crate::WorldState;
+use std::collections::HashMap;
 
 pub struct MapButton {
 	pub id: Maps,
@@ -40,11 +40,11 @@ pub struct MapSelect {
 }
 
 impl MapSelect {
-    pub fn new(screen_width: f32, screen_height: f32, world: &WorldState) -> Self {
+    pub fn new(screen_width: f32, screen_height: f32, unlocked_maps: &HashMap<String, bool>) -> Self {
         let buttons = vec![
             MapButton {
 				id: Maps::Cave("cave".into()),
-				unlocked: world.unlocked_maps["cave"],
+				unlocked: unlocked_maps["cave"],
 				unlock_requirement: "".into(),
                 mesh: Mesh::quad_2d(),
                 text_mesh: Mesh::text("CAVE"),
@@ -54,7 +54,7 @@ impl MapSelect {
             },
             MapButton {
 				id: Maps::Temple("temple".into()),
-				unlocked: world.unlocked_maps["temple"],
+				unlocked: unlocked_maps["temple"],
 				unlock_requirement: "Play 15 games in cave".into(),
                 mesh: Mesh::quad_2d(),
                 text_mesh: Mesh::text("TEMPLE"),
@@ -83,7 +83,6 @@ impl MapSelect {
     }
 
     pub unsafe fn render(&self, shader: &Shader, text_shader: &Shader, map: &Maps, font: &Texture) {
-        gl::ClearColor(0.1, 0.1, 0.1, 1.0);
         gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
         gl::Disable(gl::DEPTH_TEST);
         gl::Enable(gl::BLEND);
