@@ -9,8 +9,8 @@ mod game;
 mod texture;
 mod pause;
 mod game_over;
-mod maps;
-mod skins;
+mod map_select;
+mod skin_select;
 mod save_data;
 mod audio;
 
@@ -23,8 +23,8 @@ use crate::game::{new_game, play};
 use crate::menu::{Menu, MenuAction, render_message};
 use crate::pause::{Pause, PauseAction};
 use crate::game_over::{GameOver, GameOverAction};
-use crate::maps::{MapSelect, MapAction, Maps};
-use crate::skins::{SkinSelect, SkinAction, Skins};
+use crate::map_select::{MapSelect, MapAction, Maps};
+use crate::skin_select::{SkinSelect, SkinAction, Skins};
 use crate::texture::Texture;
 use crate::save_data::{save_progress, load_progress, extract_save_data};
 use crate::audio::AudioSystem;
@@ -69,8 +69,8 @@ struct WorldState {
 impl WorldState {
 	fn change_map(&mut self) {
 		let map_path = match &self.current_map {
-            Maps::Cave(path) | Maps::Temple(path) => format!("assets/textures/maps/{}", path),
-            Maps::None => String::from("assets/textures/maps/cave.png"),
+            Maps::Campus(path) | Maps::Cave(path) | Maps::Temple(path) => format!("assets/textures/maps/{}", path),
+            Maps::None => String::from("assets/textures/maps/campus.png"),
         };
 		
 		self.textures.insert("floor".into(), Texture::new(&format!("{}/floor.png", map_path)));
@@ -164,7 +164,8 @@ fn main() {
 		textures,
 		audio,
 		unlocked_maps: HashMap::from([
-			("cave".into(), true),
+			("campus".into(), true),
+			("cave".into(), false),
 			("temple".into(), false),
 		]),
 		unlocked_skins: HashMap::from([
@@ -199,8 +200,8 @@ fn main() {
 			world.change_skin();
 		}
     }
-	let mut map_select = MapSelect::new(SCREEN_WIDTH, SCREEN_HEIGHT, &world.unlocked_maps);
-	let mut skin_select = SkinSelect::new(SCREEN_WIDTH, SCREEN_HEIGHT, &world.unlocked_skins);
+	let mut map_select: MapSelect;
+	let mut skin_select: SkinSelect ;
 
     while !window.should_close() {
         for (_, event) in glfw::flush_messages(&events) {
@@ -212,8 +213,6 @@ fn main() {
 					world.menu = Menu::new(world.screen_width, world.screen_height);
 					world.pause = Pause::new(world.screen_width, world.screen_height);
 					world.game_over = GameOver::new(world.screen_width, world.screen_height);
-					map_select = MapSelect::new(world.screen_width, world.screen_height, &world.unlocked_maps);
-					skin_select = SkinSelect::new(world.screen_width, world.screen_height, &world.unlocked_skins);
 				}
 				WindowEvent::CursorPos(x, y) => {
 					world.mouse_x = x as f32;
@@ -247,6 +246,7 @@ fn main() {
 				}
 			},
 			GameState::MapSelect => {
+				map_select = MapSelect::new(world.screen_width, world.screen_height, &world.unlocked_maps);
 				unsafe { map_select.render(&ui_shader, &text_shader, &world.current_map, &world.textures["font"]); }
 				if world.mouse_clicked {
 					match map_select.handle_click(world.mouse_x, world.mouse_y, &world.audio, &world.current_map) {
@@ -265,6 +265,7 @@ fn main() {
 				}
 			}
 			GameState::SkinSelect => {
+				skin_select = SkinSelect::new(world.screen_width, world.screen_height, &world.unlocked_skins);
 				unsafe { skin_select.render(&ui_shader, &text_shader, &world.current_skin, &world.textures["font"]); }
 				if world.mouse_clicked {
 					match skin_select.handle_click(world.mouse_x, world.mouse_y, &world.audio, &world.current_skin) {
@@ -293,6 +294,7 @@ fn main() {
 			}
 			GameState::Playing => {
 				let map_music = match world.current_map {
+					Maps::Campus(_) => "assets/music/death_by_glamour.wav",
 					Maps::Cave(_) => "assets/music/heartache.wav",
 					Maps::Temple(_) => "assets/music/spear_of_justice.wav",
 					_ => "assets/music/megalovania.wav",

@@ -3,8 +3,8 @@ use std::io::{self, Write};
 use serde::{Serialize, Deserialize};
 use std::collections::HashMap;
 use crate::WorldState;
-use crate::maps::Maps;
-use crate::skins::Skins;
+use crate::map_select::Maps;
+use crate::skin_select::Skins;
 
 #[derive(Serialize, Deserialize)]
 pub struct SaveData {

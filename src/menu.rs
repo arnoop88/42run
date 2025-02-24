@@ -79,7 +79,7 @@ impl Menu {
 		// Title text
 		text_shader.use_program();
 		text_shader.set_mat4("projection", &self.ui_projection);
-		text_shader.set_vec3("textColor", &Vector3::new(0.4, 0.6, 1.0));
+		text_shader.set_vec3("textColor", &Vector3::new(0.5, 0.3, 0.7));
 		font.bind(0);
 	
 		let text_scale = 60.0;

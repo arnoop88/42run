@@ -27,6 +27,7 @@ pub enum MapAction {
 
 #[derive(Serialize, Deserialize, PartialEq, Clone)]
 pub enum Maps {
+	Campus(String),
 	Cave(String),
 	Temple(String),
 	None,
@@ -43,12 +44,22 @@ impl MapSelect {
     pub fn new(screen_width: f32, screen_height: f32, unlocked_maps: &HashMap<String, bool>) -> Self {
         let buttons = vec![
             MapButton {
-				id: Maps::Cave("cave".into()),
-				unlocked: unlocked_maps["cave"],
+				id: Maps::Campus("campus".into()),
+				unlocked: unlocked_maps["campus"],
 				unlock_requirement: "".into(),
                 mesh: Mesh::quad_2d(),
-                text_mesh: Mesh::text("CAVE"),
+                text_mesh: Mesh::text("CAMPUS"),
                 position: (screen_width / 2.0 - 150.0, screen_height / 2.0 + 50.0),
+                size: (300.0, 80.0),
+                color: Vector3::new(0.4, 0.4, 0.4),
+            },
+			MapButton {
+				id: Maps::Cave("cave".into()),
+				unlocked: unlocked_maps["cave"],
+				unlock_requirement: "reach 100m".into(),
+                mesh: Mesh::quad_2d(),
+                text_mesh: Mesh::text("CAVE"),
+                position: (screen_width / 2.0 - 150.0, screen_height / 2.0 - 50.0),
                 size: (300.0, 80.0),
                 color: Vector3::new(0.4, 0.4, 0.4),
             },
@@ -58,7 +69,7 @@ impl MapSelect {
 				unlock_requirement: "Play 15 games in cave".into(),
                 mesh: Mesh::quad_2d(),
                 text_mesh: Mesh::text("TEMPLE"),
-                position: (screen_width / 2.0 - 150.0, screen_height / 2.0 - 50.0),
+                position: (screen_width / 2.0 - 150.0, screen_height / 2.0 - 150.0),
                 size: (300.0, 80.0),
                 color: Vector3::new(0.4, 0.4, 0.4),
             },
@@ -91,7 +102,7 @@ impl MapSelect {
         // Title text
         text_shader.use_program();
         text_shader.set_mat4("projection", &self.ui_projection);
-        text_shader.set_vec3("textColor", &Vector3::new(0.4, 0.6, 1.0));
+        text_shader.set_vec3("textColor", &Vector3::new(0.5, 0.3, 0.7));
         font.bind(0);
     
         let text_scale = 60.0;
@@ -153,8 +164,8 @@ impl MapSelect {
 					audio.play_sound("button2");
 				}
                 return match i {
-                    0..=1 => MapAction::SelectMap(button.id.clone()),
-                    2 => MapAction::Back,
+                    0..=2 => MapAction::SelectMap(button.id.clone()),
+                    3 => MapAction::Back,
                     _ => MapAction::None,
                 };
             }

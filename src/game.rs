@@ -162,10 +162,13 @@ pub fn play(world: &mut WorldState, character: &mut Character, game_state: &mut 
 			}
 		}
 	
-		// Update highScore and unlock arcane skin
+		// Update highScore and unlock cave map and arcane skin
 		if score > world.quest_progress["highScore"] {
 			world.quest_progress.insert("highScore".into(), score);
 			world.record = true;
+			if !world.unlocked_maps["cave"] && score >= 100 {
+				world.unlocked_maps.insert("cave".into(), true);
+			}
 			if !world.unlocked_skins["arcane"] && score >= 1000 {
 				world.unlocked_skins.insert("arcane".into(), true);
 			}
