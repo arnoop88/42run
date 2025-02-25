@@ -1,6 +1,6 @@
 # 42run - Endless Runner Game
 
-![Gameplay Demo](https://imgur.com/gallery/42run-gameplay-demo-HSqXnvZ.gif)
+![Gameplay Demo](https://imgur.com/JZAcWu1)
 
 A 3D endless runner game inspired by Temple Run, built with Rust and OpenGL. Run as far as you can through procedurally generated obstacles and unlock new maps and skins!
 
