@@ -164,31 +164,31 @@ fn main() {
     textures.insert("skin".into(), Texture::new("assets/textures/skins/red.png"));
     textures.insert(
         "floor".into(),
-        Texture::new("assets/textures/maps/cave/floor.png"),
+        Texture::new("assets/textures/maps/campus/floor.png"),
     );
     textures.insert(
         "wall".into(),
-        Texture::new("assets/textures/maps/cave/wall.png"),
+        Texture::new("assets/textures/maps/campus/wall.png"),
     );
     textures.insert(
         "ceiling".into(),
-        Texture::new("assets/textures/maps/cave/ceiling.png"),
+        Texture::new("assets/textures/maps/campus/ceiling.png"),
     );
     textures.insert(
         "cube".into(),
-        Texture::new("assets/textures/maps/cave/cube.png"),
+        Texture::new("assets/textures/maps/campus/cube.png"),
     );
     textures.insert(
         "lowBar".into(),
-        Texture::new("assets/textures/maps/cave/lowBar.png"),
+        Texture::new("assets/textures/maps/campus/lowBar.png"),
     );
     textures.insert(
         "tallWall".into(),
-        Texture::new("assets/textures/maps/cave/tallWall.png"),
+        Texture::new("assets/textures/maps/campus/tallWall.png"),
     );
     textures.insert(
         "highBar".into(),
-        Texture::new("assets/textures/maps/cave/highBar.png"),
+        Texture::new("assets/textures/maps/campus/highBar.png"),
     );
 
     let mut audio = AudioSystem::new();
@@ -222,7 +222,7 @@ fn main() {
         total_pause_time: 0.0,
         record: false,
         current_skin: Skins::Red("red".into()),
-        current_map: Maps::Cave("campus".into()),
+        current_map: Maps::Campus("campus".into()),
         current_music: None,
         textures,
         audio,
