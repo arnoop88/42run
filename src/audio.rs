@@ -1,16 +1,16 @@
-use rodio::{Decoder, OutputStream, Sink, Source, OutputStreamHandle};
+use rodio::{Decoder, OutputStream, OutputStreamHandle, Sink, Source};
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::{BufReader, Cursor};
-use std::collections::HashMap;
 use std::path::Path;
 
 pub struct AudioSystem {
     _stream: Option<OutputStream>,
-	stream_handle: Option<OutputStreamHandle>,
+    stream_handle: Option<OutputStreamHandle>,
     music_sink: Option<Sink>,
     sound_effects: HashMap<String, Vec<u8>>,
-	sound_volume: f32,
-	music_volume: f32,
+    sound_volume: f32,
+    music_volume: f32,
 }
 
 impl AudioSystem {
@@ -18,14 +18,17 @@ impl AudioSystem {
         let (stream, stream_handle) = match OutputStream::try_default() {
             Ok(v) => v,
             Err(e) => {
-                eprintln!("Audio initialization failed: {}. Continuing without audio.", e);
+                eprintln!(
+                    "Audio initialization failed: {}. Continuing without audio.",
+                    e
+                );
                 return AudioSystem {
                     _stream: None,
                     stream_handle: None,
                     music_sink: None,
                     sound_effects: HashMap::new(),
-					sound_volume: 1.0,
-					music_volume: 1.0,
+                    sound_volume: 1.0,
+                    music_volume: 1.0,
                 };
             }
         };
@@ -33,14 +36,17 @@ impl AudioSystem {
         let music_sink = match Sink::try_new(&stream_handle) {
             Ok(s) => s,
             Err(e) => {
-                eprintln!("Music sink creation failed: {}. Continuing without audio.", e);
+                eprintln!(
+                    "Music sink creation failed: {}. Continuing without audio.",
+                    e
+                );
                 return AudioSystem {
                     _stream: Some(stream),
                     stream_handle: Some(stream_handle),
                     music_sink: None,
                     sound_effects: HashMap::new(),
-					sound_volume: 1.0,
-					music_volume: 1.0,
+                    sound_volume: 1.0,
+                    music_volume: 1.0,
                 };
             }
         };
@@ -50,14 +56,16 @@ impl AudioSystem {
             stream_handle: Some(stream_handle),
             music_sink: Some(music_sink),
             sound_effects: HashMap::new(),
-			sound_volume: 1.0,
-			music_volume: 1.0,
+            sound_volume: 1.0,
+            music_volume: 1.0,
         }
     }
 
     // Preload sound effects
     pub fn load_sound(&mut self, name: &str, path: &str) {
-        if self.music_sink.is_none() { return; }
+        if self.music_sink.is_none() {
+            return;
+        }
         let file = File::open(Path::new(path)).unwrap();
         let mut reader = BufReader::new(file);
         let mut buffer = Vec::new();
@@ -120,11 +128,11 @@ impl AudioSystem {
         }
     }
 
-	pub fn sound_volume(&mut self, volume: f32) {
+    pub fn sound_volume(&mut self, volume: f32) {
         self.sound_volume = volume.clamp(0.0, 1.0);
     }
 
-	pub fn stop_music(&mut self) {
+    pub fn stop_music(&mut self) {
         if let Some(sink) = self.music_sink.take() {
             sink.stop();
         }
