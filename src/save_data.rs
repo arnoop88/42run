@@ -17,13 +17,13 @@ pub struct SaveData {
 
 pub fn save_progress(save_data: &SaveData) -> io::Result<()> {
     let json = serde_json::to_string_pretty(save_data).expect("Failed to serialize save data");
-    let mut file = fs::File::create("target/game_data.json")?;
+    let mut file = fs::File::create("game_data.json")?;
     file.write_all(json.as_bytes())?;
     Ok(())
 }
 
 pub fn load_progress() -> io::Result<SaveData> {
-    let data = fs::read_to_string("target/game_data.json")?;
+    let data = fs::read_to_string("game_data.json")?;
     let save_data = serde_json::from_str(&data).expect("Failed to deserialize save data");
     Ok(save_data)
 }
