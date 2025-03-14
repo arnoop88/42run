@@ -29,7 +29,7 @@ A 3D endless runner game inspired by Temple Run, built with Rust and OpenGL. Run
 ## Controls
 | Action          | Key Bindings           |
 |-----------------|------------------------|
-| Move Left       | `← `/ `A`              |
+| Move Left       | `←` / `A`              |
 | Move Right      | `→` / `D`              |
 | Jump            | `Space` / `W` / `↑`    |
 | Slide           | `S` / `↓`              |
