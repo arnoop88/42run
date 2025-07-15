@@ -45,7 +45,7 @@ A 3D endless runner game inspired by Temple Run, built with Rust and OpenGL. Run
 - Rust 1.60+ (install via [rustup](https://rustup.rs/))
 - Cargo (Rust package manager)
 
-#### Install dependencies
+### Install dependencies
 ```bash
 sudo apt-get install build-essential libglfw3-dev libpng-dev libasound2-dev libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libgl1-mesa-dev
 ```
