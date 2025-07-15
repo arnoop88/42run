@@ -44,25 +44,11 @@ A 3D endless runner game inspired by Temple Run, built with Rust and OpenGL. Run
 ### Prerequisites
 - Rust 1.60+ (install via [rustup](https://rustup.rs/))
 - Cargo (Rust package manager)
-- System dependencies:
-  - OpenGL 3.3+
-  - GLFW
-  - libpng
 
-#### Linux (Ubuntu/Debian)
+#### Install dependencies
 ```bash
-sudo apt-get install build-essential libglfw3-dev libpng-dev
+sudo apt-get install build-essential libglfw3-dev libpng-dev libasound2-dev libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libgl1-mesa-dev
 ```
-
-#### macOS
-```bash
-brew install glfw pkg-config
-```
-
-### Windows
-Intall pre-built binaries for:
-- [GLFW](https://www.glfw.org/download.html)
-- [libpng](https://gnuwin32.sourceforge.net/packages/libpng.htm)
 
 ### Building & Running
 ```bash
